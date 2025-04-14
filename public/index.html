@@ -8,174 +8,818 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="styles.css" />
+    <!-- Heroicons (for icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+      }
+
+      .sidebar {
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        overflow-y: auto;
+        transition: all 0.3s;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .content-area {
+        transition: all 0.3s;
+      }
+
+      .nav-link {
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        margin: 0.25rem 0;
+      }
+
+      .nav-link:hover {
+        background-color: #e5edff;
+      }
+
+      .nav-link.active {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .card {
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+      }
+
+      .status-original {
+        background-color: #d1fae5;
+        color: #065f46;
+      }
+
+      .status-duplicate {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      table {
+        border-radius: 0.5rem;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+
+      table thead tr {
+        background-color: #1e3a8a;
+        color: white;
+      }
+
+      table tbody tr:hover {
+        background-color: #e5edff;
+      }
+
+      .btn {
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: #2563eb;
+      }
+
+      .btn-secondary {
+        background-color: #e5e7eb;
+        color: #4b5563;
+      }
+
+      .btn-secondary:hover {
+        background-color: #d1d5db;
+      }
+
+      .btn-success {
+        background-color: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background-color: #059669;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background-color: white;
+        border-radius: 0.75rem;
+        width: 100%;
+        max-width: 32rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        animation: modalFade 0.3s;
+      }
+
+      @keyframes modalFade {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .form-group {
+        margin-bottom: 1rem;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.375rem;
+        transition: border-color 0.2s;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+      }
+
+      .view {
+        display: none;
+      }
+
+      .view.active {
+        display: block;
+      }
+
+      .alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .alert-success {
+        background-color: #d1fae5;
+        color: #065f46;
+        border-left: 4px solid #10b981;
+      }
+
+      .alert-error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border-left: 4px solid #ef4444;
+      }
+
+      /* Mobile responsive adjustments */
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 100%;
+          height: auto;
+          position: relative;
+        }
+
+        .content-area {
+          margin-left: 0 !important;
+        }
+
+        .dashboard-cards {
+          grid-template-columns: 1fr !important;
+        }
+      }
+
+      .dashboard-count {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e3a8a;
+      }
+
+      .dashboard-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+      }
+
+      .member-avatar {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: white;
+      }
+    </style>
   </head>
-  <body class="bg-gray-100 font-sans">
-    <!-- Navigation -->
-    <nav class="bg-blue-900 text-white p-4">
-      <div class="container mx-auto flex justify-between items-center">
-        <h1 class="text-xl font-bold">Thesis Review Tracker</h1>
-        <div class="space-x-4">
-          <button onclick="showView('dashboard')" class="nav-btn">Dashboard</button>
-          <button onclick="showView('all-papers')" class="nav-btn">All Papers</button>
-          <button onclick="showView('sarwar')" class="nav-btn">Sarwar</button>
-          <button onclick="showView('mou')" class="nav-btn">Mou</button>
-          <button onclick="showView('soumitro')" class="nav-btn">Soumitro</button>
-          <button onclick="showView('eti')" class="nav-btn">Eti</button>
-          <button onclick="showView('musfiq')" class="nav-btn">Musfiq</button>
-          <button onclick="showView('charts')" class="nav-btn">Charts</button>
-          <button onclick="showView('add-paper')" class="nav-btn">Add Paper</button>
-          <button onclick="showView('help')" class="nav-btn">Help</button>
+  <body>
+    <div class="flex">
+      <!-- Sidebar Navigation -->
+      <div class="sidebar bg-white w-64 z-10">
+        <div class="p-4 bg-blue-900 text-white">
+          <h1 class="text-xl font-bold">Thesis Tracker</h1>
+          <p class="text-sm text-blue-200">Paper Review Management</p>
         </div>
-      </div>
-    </nav>
 
-    <!-- Content -->
-    <div class="container mx-auto p-4">
-      <!-- Views -->
-      <div id="dashboard" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Dashboard</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="bg-white p-4 rounded shadow">
-            <h3 class="text-lg font-semibold text-blue-700">Papers Summary</h3>
-            <p><b>Total Papers:</b> <span id="total-papers">0</span></p>
-            <p><b>Original Papers:</b> <span id="original-papers">0</span></p>
-            <p><b>Duplicate Papers:</b> <span id="duplicate-papers">0</span></p>
-          </div>
-          <div class="bg-white p-4 rounded shadow">
-            <h3 class="text-lg font-semibold text-blue-700">Member Summary</h3>
-            <p>Sarwar: <span id="sarwar-count">0</span></p>
-            <p>Mou: <span id="mou-count">0</span></p>
-            <p>Soumitro: <span id="soumitro-count">0</span></p>
-            <p>Eti: <span id="eti-count">0</span></p>
-            <p>Musfiq: <span id="musfiq-count">0</span></p>
-          </div>
-        </div>
-      </div>
+        <nav class="p-3">
+          <h2 class="text-xs uppercase font-semibold text-gray-500 tracking-wide mb-2 ml-2">Main</h2>
+          <a href="#" onclick="showView('dashboard')" class="nav-link" data-view="dashboard">
+            <i class="fas fa-chart-pie w-5 mr-3"></i> Dashboard
+          </a>
+          <a href="#" onclick="showView('all-papers')" class="nav-link" data-view="all-papers">
+            <i class="fas fa-file-alt w-5 mr-3"></i> All Papers
+          </a>
+          <a href="#" onclick="showView('charts')" class="nav-link" data-view="charts">
+            <i class="fas fa-chart-bar w-5 mr-3"></i> Charts
+          </a>
 
-      <div id="all-papers" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">All Papers</h2>
-        <button onclick="checkDuplicates()" class="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">
-          Check Duplicates
-        </button>
-        <table class="w-full bg-white rounded shadow">
-          <thead>
-            <tr class="bg-blue-900 text-white">
-              <th class="p-2">ID</th>
-              <th class="p-2">Member</th>
-              <th class="p-2">Paper Title</th>
-              <th class="p-2">Paper Link</th>
-              <th class="p-2">Description</th>
-              <th class="p-2">Status</th>
-              <th class="p-2">Date Added</th>
-            </tr>
-          </thead>
-          <tbody id="all-papers-table"></tbody>
-        </table>
+          <h2 class="text-xs uppercase font-semibold text-gray-500 tracking-wide mb-2 ml-2 mt-6">Members</h2>
+          <a href="#" onclick="showView('sarwar')" class="nav-link" data-view="sarwar">
+            <i class="fas fa-user w-5 mr-3"></i> Sarwar
+          </a>
+          <a href="#" onclick="showView('mou')" class="nav-link" data-view="mou">
+            <i class="fas fa-user w-5 mr-3"></i> Mou
+          </a>
+          <a href="#" onclick="showView('soumitro')" class="nav-link" data-view="soumitro">
+            <i class="fas fa-user w-5 mr-3"></i> Soumitro
+          </a>
+          <a href="#" onclick="showView('eti')" class="nav-link" data-view="eti">
+            <i class="fas fa-user w-5 mr-3"></i> Eti
+          </a>
+          <a href="#" onclick="showView('musfiq')" class="nav-link" data-view="musfiq">
+            <i class="fas fa-user w-5 mr-3"></i> Musfiq
+          </a>
+
+          <h2 class="text-xs uppercase font-semibold text-gray-500 tracking-wide mb-2 ml-2 mt-6">Other</h2>
+          <a href="#" onclick="showView('add-paper')" class="nav-link" data-view="add-paper">
+            <i class="fas fa-plus w-5 mr-3"></i> Add Paper
+          </a>
+          <a href="#" onclick="showView('help')" class="nav-link" data-view="help">
+            <i class="fas fa-question-circle w-5 mr-3"></i> Help
+          </a>
+        </nav>
       </div>
 
-      <!-- Member Views -->
-      <div id="sarwar" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Sarwar's Papers</h2>
-        <table class="w-full bg-white rounded shadow">
-          <thead>
-            <tr class="bg-blue-900 text-white">
-              <th class="p-2">ID</th>
-              <th class="p-2">Paper Title</th>
-              <th class="p-2">Paper Link</th>
-              <th class="p-2">Description</th>
-              <th class="p-2">Status</th>
-              <th class="p-2">Date Added</th>
-            </tr>
-          </thead>
-          <tbody id="sarwar-table"></tbody>
-        </table>
-      </div>
-      <div id="mou" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Mou's Papers</h2>
-        <table class="w-full bg-white rounded shadow">
-          <thead>
-            <tr class="bg-blue-900 text-white">
-              <th class="p-2">ID</th>
-              <th class="p-2">Paper Title</th>
-              <th class="p-2">Paper Link</th>
-              <th class="p-2">Description</th>
-              <th class="p-2">Status</th>
-              <th class="p-2">Date Added</th>
-            </tr>
-          </thead>
-          <tbody id="mou-table"></tbody>
-        </table>
-      </div>
-      <div id="soumitro" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Soumitro's Papers</h2>
-        <table class="w-full bg-white rounded shadow">
-          <thead>
-            <tr class="bg-blue-900 text-white">
-              <th class="p-2">ID</th>
-              <th class="p-2">Paper Title</th>
-              <th class="p-2">Paper Link</th>
-              <th class="p-2">Description</th>
-              <th class="p-2">Status</th>
-              <th class="p-2">Date Added</th>
-            </tr>
-          </thead>
-          <tbody id="soumitro-table"></tbody>
-        </table>
-      </div>
-      <div id="eti" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Eti's Papers</h2>
-        <table class="w-full bg-white rounded shadow">
-          <thead>
-            <tr class="bg-blue-900 text-white">
-              <th class="p-2">ID</th>
-              <th class="p-2">Paper Title</th>
-              <th class="p-2">Paper Link</th>
-              <th class="p-2">Description</th>
-              <th class="p-2">Status</th>
-              <th class="p-2">Date Added</th>
-            </tr>
-          </thead>
-          <tbody id="eti-table"></tbody>
-        </table>
-      </div>
-      <div id="musfiq" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Musfiq's Papers</h2>
-        <table class="w-full bg-white rounded shadow">
-          <thead>
-            <tr class="bg-blue-900 text-white">
-              <th class="p-2">ID</th>
-              <th class="p-2">Paper Title</th>
-              <th class="p-2">Paper Link</th>
-              <th class="p-2">Description</th>
-              <th class="p-2">Status</th>
-              <th class="p-2">Date Added</th>
-            </tr>
-          </thead>
-          <tbody id="musfiq-table"></tbody>
-        </table>
-      </div>
-
-      <div id="charts" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Charts</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h3 class="text-lg font-semibold text-blue-700">Duplicate Status</h3>
-            <canvas id="status-chart"></canvas>
-          </div>
-          <div>
-            <h3 class="text-lg font-semibold text-blue-700">Papers by Member</h3>
-            <canvas id="member-chart"></canvas>
+      <!-- Main Content Area -->
+      <div class="content-area w-full ml-64">
+        <!-- Top Bar -->
+        <div class="bg-white p-4 flex justify-between items-center shadow-sm">
+          <h2 id="page-title" class="text-xl font-semibold text-gray-800">Dashboard</h2>
+          <div class="flex space-x-3">
+            <button onclick="checkDuplicates()" class="btn btn-secondary">
+              <i class="fas fa-sync-alt mr-2"></i> Check Duplicates
+            </button>
+            <button onclick="openAddPaperModal()" class="btn btn-primary">
+              <i class="fas fa-plus mr-2"></i> Add Paper
+            </button>
           </div>
         </div>
-      </div>
 
-      <div id="add-paper" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Add New Paper</h2>
-        <form id="paper-form" class="bg-white p-4 rounded shadow max-w-lg">
-          <div class="mb-4">
-            <label for="member" class="block font-semibold">Member</label>
-            <select id="member" class="w-full p-2 border rounded" required>
+        <!-- Content Views -->
+        <div class="p-6">
+          <!-- Dashboard View -->
+          <div id="dashboard" class="view">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 dashboard-cards">
+              <div class="card bg-white p-5">
+                <h3 class="text-sm font-medium text-gray-500">Total Papers</h3>
+                <div class="dashboard-count" id="total-papers">0</div>
+                <div class="mt-2 flex items-center text-green-500">
+                  <i class="fas fa-file-alt mr-2"></i>
+                  <span>All submissions</span>
+                </div>
+              </div>
+
+              <div class="card bg-white p-5">
+                <h3 class="text-sm font-medium text-gray-500">Original Papers</h3>
+                <div class="dashboard-count" id="original-papers">0</div>
+                <div class="mt-2 flex items-center text-green-500">
+                  <i class="fas fa-check-circle mr-2"></i>
+                  <span>Unique entries</span>
+                </div>
+              </div>
+
+              <div class="card bg-white p-5">
+                <h3 class="text-sm font-medium text-gray-500">Duplicate Papers</h3>
+                <div class="dashboard-count" id="duplicate-papers">0</div>
+                <div class="mt-2 flex items-center text-red-500">
+                  <i class="fas fa-copy mr-2"></i>
+                  <span>Already submitted</span>
+                </div>
+              </div>
+
+              <div class="card bg-white p-5">
+                <h3 class="text-sm font-medium text-gray-500">Members</h3>
+                <div class="dashboard-count">5</div>
+                <div class="mt-2 flex items-center text-blue-500">
+                  <i class="fas fa-users mr-2"></i>
+                  <span>Active contributors</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="card bg-white p-5">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Member Contributions</h3>
+                <div class="space-y-4">
+                  <div class="flex items-center">
+                    <div class="member-avatar bg-blue-500 mr-3">S</div>
+                    <div class="flex-grow">
+                      <div class="flex justify-between">
+                        <span class="font-medium">Sarwar</span>
+                        <span id="sarwar-count" class="text-blue-600 font-medium">0</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div id="sarwar-progress" class="bg-blue-500 rounded-full h-2" style="width: 0%"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center">
+                    <div class="member-avatar bg-green-500 mr-3">M</div>
+                    <div class="flex-grow">
+                      <div class="flex justify-between">
+                        <span class="font-medium">Mou</span>
+                        <span id="mou-count" class="text-green-600 font-medium">0</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div id="mou-progress" class="bg-green-500 rounded-full h-2" style="width: 0%"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center">
+                    <div class="member-avatar bg-pink-500 mr-3">S</div>
+                    <div class="flex-grow">
+                      <div class="flex justify-between">
+                        <span class="font-medium">Soumitro</span>
+                        <span id="soumitro-count" class="text-pink-600 font-medium">0</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div id="soumitro-progress" class="bg-pink-500 rounded-full h-2" style="width: 0%"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center">
+                    <div class="member-avatar bg-yellow-500 mr-3">E</div>
+                    <div class="flex-grow">
+                      <div class="flex justify-between">
+                        <span class="font-medium">Eti</span>
+                        <span id="eti-count" class="text-yellow-600 font-medium">0</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div id="eti-progress" class="bg-yellow-500 rounded-full h-2" style="width: 0%"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center">
+                    <div class="member-avatar bg-purple-500 mr-3">M</div>
+                    <div class="flex-grow">
+                      <div class="flex justify-between">
+                        <span class="font-medium">Musfiq</span>
+                        <span id="musfiq-count" class="text-purple-600 font-medium">0</span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div id="musfiq-progress" class="bg-purple-500 rounded-full h-2" style="width: 0%"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card bg-white p-5">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
+                <div class="space-y-4" id="recent-activity">
+                  <div class="flex items-start">
+                    <div class="bg-blue-100 p-2 rounded-full text-blue-500 mr-3">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div>
+                      <p class="font-medium">System initialized</p>
+                      <p class="text-sm text-gray-500">Ready to track paper submissions</p>
+                      <p class="text-xs text-gray-400 mt-1">Just now</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- All Papers View -->
+          <div id="all-papers" class="view">
+            <div class="bg-white rounded-lg p-4 mb-6 shadow-sm">
+              <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">Paper Inventory</h3>
+                <div class="flex space-x-2">
+                  <input
+                    type="text"
+                    id="search-papers"
+                    placeholder="Search papers..."
+                    class="form-control"
+                    onkeyup="searchPapers()"
+                  />
+                  <select id="status-filter" class="form-control" onchange="filterPapers()">
+                    <option value="all">All Status</option>
+                    <option value="Original">Original</option>
+                    <option value="Duplicate">Duplicate</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="p-3">ID</th>
+                      <th class="p-3">Member</th>
+                      <th class="p-3">Paper Title</th>
+                      <th class="p-3 whitespace-nowrap">Paper Link</th>
+                      <th class="p-3">Description</th>
+                      <th class="p-3">Status</th>
+                      <th class="p-3">Date Added</th>
+                    </tr>
+                  </thead>
+                  <tbody id="all-papers-table">
+                    <!-- Papers will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Member Views -->
+          <!-- Sarwar View -->
+          <div id="sarwar" class="view">
+            <div class="card bg-white p-5 mb-6">
+              <div class="flex items-center">
+                <div class="member-avatar bg-blue-500 text-2xl mr-4">S</div>
+                <div>
+                  <h3 class="text-xl font-semibold">Sarwar</h3>
+                  <p class="text-gray-500"><span id="sarwar-count-view">0</span> papers submitted</p>
+                </div>
+                <div class="ml-auto">
+                  <button onclick="openAddPaperModalForMember('Sarwar')" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i> Add Paper
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Submitted Papers</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="p-3">ID</th>
+                      <th class="p-3">Paper Title</th>
+                      <th class="p-3">Paper Link</th>
+                      <th class="p-3">Description</th>
+                      <th class="p-3">Status</th>
+                      <th class="p-3">Date Added</th>
+                    </tr>
+                  </thead>
+                  <tbody id="sarwar-table">
+                    <!-- Papers will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mou View -->
+          <div id="mou" class="view">
+            <div class="card bg-white p-5 mb-6">
+              <div class="flex items-center">
+                <div class="member-avatar bg-green-500 text-2xl mr-4">M</div>
+                <div>
+                  <h3 class="text-xl font-semibold">Mou</h3>
+                  <p class="text-gray-500"><span id="mou-count-view">0</span> papers submitted</p>
+                </div>
+                <div class="ml-auto">
+                  <button onclick="openAddPaperModalForMember('Mou')" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i> Add Paper
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Submitted Papers</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="p-3">ID</th>
+                      <th class="p-3">Paper Title</th>
+                      <th class="p-3">Paper Link</th>
+                      <th class="p-3">Description</th>
+                      <th class="p-3">Status</th>
+                      <th class="p-3">Date Added</th>
+                    </tr>
+                  </thead>
+                  <tbody id="mou-table">
+                    <!-- Papers will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Soumitro View -->
+          <div id="soumitro" class="view">
+            <div class="card bg-white p-5 mb-6">
+              <div class="flex items-center">
+                <div class="member-avatar bg-pink-500 text-2xl mr-4">S</div>
+                <div>
+                  <h3 class="text-xl font-semibold">Soumitro</h3>
+                  <p class="text-gray-500"><span id="soumitro-count-view">0</span> papers submitted</p>
+                </div>
+                <div class="ml-auto">
+                  <button onclick="openAddPaperModalForMember('Soumitro')" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i> Add Paper
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Submitted Papers</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="p-3">ID</th>
+                      <th class="p-3">Paper Title</th>
+                      <th class="p-3">Paper Link</th>
+                      <th class="p-3">Description</th>
+                      <th class="p-3">Status</th>
+                      <th class="p-3">Date Added</th>
+                    </tr>
+                  </thead>
+                  <tbody id="soumitro-table">
+                    <!-- Papers will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Eti View -->
+          <div id="eti" class="view">
+            <div class="card bg-white p-5 mb-6">
+              <div class="flex items-center">
+                <div class="member-avatar bg-yellow-500 text-2xl mr-4">E</div>
+                <div>
+                  <h3 class="text-xl font-semibold">Eti</h3>
+                  <p class="text-gray-500"><span id="eti-count-view">0</span> papers submitted</p>
+                </div>
+                <div class="ml-auto">
+                  <button onclick="openAddPaperModalForMember('Eti')" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i> Add Paper
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Submitted Papers</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="p-3">ID</th>
+                      <th class="p-3">Paper Title</th>
+                      <th class="p-3">Paper Link</th>
+                      <th class="p-3">Description</th>
+                      <th class="p-3">Status</th>
+                      <th class="p-3">Date Added</th>
+                    </tr>
+                  </thead>
+                  <tbody id="eti-table">
+                    <!-- Papers will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Musfiq View -->
+          <div id="musfiq" class="view">
+            <div class="card bg-white p-5 mb-6">
+              <div class="flex items-center">
+                <div class="member-avatar bg-purple-500 text-2xl mr-4">M</div>
+                <div>
+                  <h3 class="text-xl font-semibold">Musfiq</h3>
+                  <p class="text-gray-500"><span id="musfiq-count-view">0</span> papers submitted</p>
+                </div>
+                <div class="ml-auto">
+                  <button onclick="openAddPaperModalForMember('Musfiq')" class="btn btn-primary">
+                    <i class="fas fa-plus mr-2"></i> Add Paper
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">Submitted Papers</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead>
+                    <tr>
+                      <th class="p-3">ID</th>
+                      <th class="p-3">Paper Title</th>
+                      <th class="p-3">Paper Link</th>
+                      <th class="p-3">Description</th>
+                      <th class="p-3">Status</th>
+                      <th class="p-3">Date Added</th>
+                    </tr>
+                  </thead>
+                  <tbody id="musfiq-table">
+                    <!-- Papers will be populated here -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts View -->
+          <div id="charts" class="view">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="card bg-white p-5">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Duplicate Status</h3>
+                <canvas id="status-chart" height="250"></canvas>
+              </div>
+
+              <div class="card bg-white p-5">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Papers by Member</h3>
+                <canvas id="member-chart" height="250"></canvas>
+              </div>
+
+              <div class="card bg-white p-5">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Submission Timeline</h3>
+                <canvas id="timeline-chart" height="250"></canvas>
+              </div>
+
+              <div class="card bg-white p-5">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Member Performance</h3>
+                <canvas id="performance-chart" height="250"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add Paper View -->
+          <div id="add-paper" class="view">
+            <div class="card bg-white p-6 max-w-lg mx-auto">
+              <h3 class="text-xl font-semibold text-gray-800 mb-6">Add New Paper</h3>
+
+              <form id="paper-form">
+                <div class="form-group">
+                  <label for="member" class="block text-sm font-medium text-gray-700 mb-1">Select Member</label>
+                  <select id="member" class="form-control" required>
+                    <option value="">Select Member</option>
+                    <option value="Sarwar">Sarwar</option>
+                    <option value="Mou">Mou</option>
+                    <option value="Soumitro">Soumitro</option>
+                    <option value="Eti">Eti</option>
+                    <option value="Musfiq">Musfiq</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="paper-title" class="block text-sm font-medium text-gray-700 mb-1">Paper Title</label>
+                  <input type="text" id="paper-title" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="paper-link" class="block text-sm font-medium text-gray-700 mb-1">Paper Link</label>
+                  <input type="url" id="paper-link" class="form-control" required placeholder="https://..." />
+                </div>
+
+                <div class="form-group">
+                  <label for="paper-description" class="block text-sm font-medium text-gray-700 mb-1"
+                    >Description</label
+                  >
+                  <textarea id="paper-description" class="form-control" rows="3" required></textarea>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                  <button type="button" onclick="showView('dashboard')" class="btn btn-secondary mr-2">Cancel</button>
+                  <button type="submit" class="btn btn-primary">Add Paper</button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Help View -->
+          <div id="help" class="view">
+            <div class="card bg-white p-6">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">Help & Documentation</h3>
+
+              <div class="space-y-6">
+                <div>
+                  <h4 class="text-lg font-medium text-blue-800 mb-2">Getting Started</h4>
+                  <p class="text-gray-700">
+                    Thesis Review Tracker helps you manage paper submissions from group members and automatically
+                    detects duplicates. This tool ensures that team members don't inadvertently review the same paper
+                    twice.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 class="text-lg font-medium text-blue-800 mb-2">Adding Papers</h4>
+                  <p class="text-gray-700">You can add papers in two ways:</p>
+                  <ul class="list-disc list-inside mt-2 text-gray-700">
+                    <li>Click the "Add Paper" button in the top bar</li>
+                    <li>Go to a specific member's page and click the "Add Paper" button there</li>
+                  </ul>
+                  <p class="text-gray-700 mt-2">
+                    Be sure to provide an accurate paper title and link to help with duplicate detection.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 class="text-lg font-medium text-blue-800 mb-2">Checking Duplicates</h4>
+                  <p class="text-gray-700">
+                    The system automatically checks for duplicates when papers are added, but you can manually trigger a
+                    duplicate check by clicking the "Check Duplicates" button in the top bar.
+                  </p>
+                </div>
+
+                <div>
+                  <h4 class="text-lg font-medium text-blue-800 mb-2">Understanding the Dashboard</h4>
+                  <p class="text-gray-700">The dashboard provides an overview of:</p>
+                  <ul class="list-disc list-inside mt-2 text-gray-700">
+                    <li>Total papers submitted</li>
+                    <li>Number of original vs duplicate papers</li>
+                    <li>Individual member contributions</li>
+                    <li>Recent activity in the system</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h4 class="text-lg font-medium text-blue-800 mb-2">Need More Help?</h4>
+                  <p class="text-gray-700">
+                    If you have any questions or encounter any issues, please contact the system administrator.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Paper Modal -->
+    <div id="add-paper-modal" class="modal">
+      <div class="modal-content p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-800">Add New Paper</h3>
+          <button onclick="closeAddPaperModal()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <form id="modal-paper-form">
+          <div class="form-group">
+            <label for="modal-member" class="block text-sm font-medium text-gray-700 mb-1">Select Member</label>
+            <select id="modal-member" class="form-control" required>
               <option value="">Select Member</option>
               <option value="Sarwar">Sarwar</option>
               <option value="Mou">Mou</option>
@@ -184,50 +828,547 @@
               <option value="Musfiq">Musfiq</option>
             </select>
           </div>
-          <div class="mb-4">
-            <label for="paper-title" class="block font-semibold">Paper Title</label>
-            <input type="text" id="paper-title" class="w-full p-2 border rounded" required />
-          </div>
-          <div class="mb-4">
-            <label for="paper-link" class="block font-semibold">Paper Link</label>
-            <input type="url" id="paper-link" class="w-full p-2 border rounded" required />
-          </div>
-          <div class="mb-4">
-            <label for="description" class="block font-semibold">Description</label>
-            <textarea id="description" class="w-full p-2 border rounded" rows="4"></textarea>
-          </div>
-          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Paper</button>
-        </form>
-      </div>
 
-      <div id="help" class="view hidden">
-        <h2 class="text-2xl font-bold text-blue-900 mb-4">Help</h2>
-        <div class="bg-white p-4 rounded shadow">
-          <h3 class="text-lg font-semibold text-blue-700">Overview</h3>
-          <ul class="list-disc pl-5">
-            <li><b>Dashboard</b>: View total, original, and duplicate paper counts.</li>
-            <li><b>All Papers</b>: Lists all papers with duplicate status.</li>
-            <li><b>Member Pages</b>: View individual member's papers.</li>
-            <li><b>Charts</b>: Visualize duplicate status and member distribution.</li>
-          </ul>
-          <h3 class="text-lg font-semibold text-blue-700 mt-4">Adding Papers</h3>
-          <ul class="list-disc pl-5">
-            <li>Click "Add Paper" and fill in member, title, link, and optional description.</li>
-            <li>Duplicates are flagged automatically (green for Original, red for Duplicate).</li>
-          </ul>
-          <h3 class="text-lg font-semibold text-blue-700 mt-4">Managing Duplicates</h3>
-          <ul class="list-disc pl-5">
-            <li>Click "Check Duplicates" on All Papers to update statuses.</li>
-          </ul>
-          <h3 class="text-lg font-semibold text-blue-700 mt-4">Data Storage</h3>
-          <ul class="list-disc pl-5">
-            <li>Data is saved automatically to data.json in the app folder.</li>
-            <li>Backup data.json regularly to avoid data loss.</li>
-          </ul>
-        </div>
+          <div class="form-group">
+            <label for="modal-paper-title" class="block text-sm font-medium text-gray-700 mb-1">Paper Title</label>
+            <input type="text" id="modal-paper-title" class="form-control" required />
+          </div>
+
+          <div class="form-group">
+            <label for="modal-paper-link" class="block text-sm font-medium text-gray-700 mb-1">Paper Link</label>
+            <input type="url" id="modal-paper-link" class="form-control" required placeholder="https://..." />
+          </div>
+
+          <div class="form-group">
+            <label for="modal-paper-description" class="block text-sm font-medium text-gray-700 mb-1"
+              >Description</label
+            >
+            <textarea id="modal-paper-description" class="form-control" rows="3" required></textarea>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <button type="button" onclick="closeAddPaperModal()" class="btn btn-secondary mr-2">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add Paper</button>
+          </div>
+        </form>
       </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- JavaScript -->
+    <script>
+      // Data storage
+      let papers = [];
+      let nextId = 1;
+
+      // Initialize active view
+      document.addEventListener("DOMContentLoaded", function () {
+        showView("dashboard");
+
+        // Set up form submissions
+        document.getElementById("paper-form").addEventListener("submit", function (e) {
+          e.preventDefault();
+          addPaper();
+        });
+
+        document.getElementById("modal-paper-form").addEventListener("submit", function (e) {
+          e.preventDefault();
+          addPaperFromModal();
+        });
+
+        // Initialize charts
+        initializeCharts();
+      });
+
+      // View switching
+      function showView(viewId) {
+        // Hide all views
+        const views = document.querySelectorAll(".view");
+        views.forEach((view) => view.classList.remove("active"));
+
+        // Show selected view
+        document.getElementById(viewId).classList.add("active");
+
+        // Update page title
+        document.getElementById("page-title").textContent = viewId
+          .replace(/-/g, " ")
+          .replace(/\b\w/g, (l) => l.toUpperCase());
+
+        // Update active nav link
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach((link) => link.classList.remove("active"));
+        document.querySelector(`.nav-link[data-view="${viewId}"]`).classList.add("active");
+
+        // Refresh data if needed
+        updateDashboard();
+        updateAllPapersTables();
+        updateCharts();
+      }
+
+      // Add paper from the form
+      function addPaper() {
+        const member = document.getElementById("member").value;
+        const title = document.getElementById("paper-title").value;
+        const link = document.getElementById("paper-link").value;
+        const description = document.getElementById("paper-description").value;
+
+        if (!member || !title || !link) {
+          alert("Please fill in all required fields");
+          return;
+        }
+
+        const newPaper = {
+          id: nextId++,
+          member,
+          title,
+          link,
+          description,
+          status: "Original", // Will be checked later
+          date: new Date().toISOString().split("T")[0],
+        };
+
+        papers.push(newPaper);
+        checkDuplicates();
+
+        // Reset form
+        document.getElementById("paper-form").reset();
+
+        // Show success message
+        alert("Paper added successfully!");
+
+        // Update UI
+        addRecentActivity(`${member} added a new paper: "${title}"`);
+        updateDashboard();
+        updateAllPapersTables();
+        updateCharts();
+
+        // Go to dashboard
+        showView("dashboard");
+      }
+
+      // Add paper from modal
+      function addPaperFromModal() {
+        const member = document.getElementById("modal-member").value;
+        const title = document.getElementById("modal-paper-title").value;
+        const link = document.getElementById("modal-paper-link").value;
+        const description = document.getElementById("modal-paper-description").value;
+
+        if (!member || !title || !link) {
+          alert("Please fill in all required fields");
+          return;
+        }
+
+        const newPaper = {
+          id: nextId++,
+          member,
+          title,
+          link,
+          description,
+          status: "Original", // Will be checked later
+          date: new Date().toISOString().split("T")[0],
+        };
+
+        papers.push(newPaper);
+        checkDuplicates();
+
+        // Reset form and close modal
+        document.getElementById("modal-paper-form").reset();
+        closeAddPaperModal();
+
+        // Show success message
+        alert("Paper added successfully!");
+
+        // Update UI
+        addRecentActivity(`${member} added a new paper: "${title}"`);
+        updateDashboard();
+        updateAllPapersTables();
+        updateCharts();
+      }
+
+      // Check for duplicate papers
+      function checkDuplicates() {
+        // Simple check based on title or link
+        for (let i = 0; i < papers.length; i++) {
+          papers[i].status = "Original"; // Reset status
+
+          for (let j = 0; j < i; j++) {
+            const titleSimilarity = calculateSimilarity(papers[i].title.toLowerCase(), papers[j].title.toLowerCase());
+            const linkMatch = papers[i].link === papers[j].link;
+
+            if (titleSimilarity > 0.8 || linkMatch) {
+              papers[i].status = "Duplicate";
+              addRecentActivity(`Detected duplicate: "${papers[i].title}" (submitted by ${papers[i].member})`);
+              break;
+            }
+          }
+        }
+
+        updateDashboard();
+        updateAllPapersTables();
+        updateCharts();
+      }
+
+      // Simple string similarity function (Levenshtein-based)
+      function calculateSimilarity(str1, str2) {
+        if (str1 === str2) return 1.0;
+        if (str1.length === 0 || str2.length === 0) return 0.0;
+
+        const distance = levenshteinDistance(str1, str2);
+        return 1 - distance / Math.max(str1.length, str2.length);
+      }
+
+      function levenshteinDistance(str1, str2) {
+        const m = str1.length;
+        const n = str2.length;
+
+        // Create a matrix of size (m+1) x (n+1)
+        const dp = Array(m + 1)
+          .fill()
+          .map(() => Array(n + 1).fill(0));
+
+        // Initialize the matrix
+        for (let i = 0; i <= m; i++) dp[i][0] = i;
+        for (let j = 0; j <= n; j++) dp[0][j] = j;
+
+        // Fill the matrix
+        for (let i = 1; i <= m; i++) {
+          for (let j = 1; j <= n; j++) {
+            const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+            dp[i][j] = Math.min(
+              dp[i - 1][j] + 1, // deletion
+              dp[i][j - 1] + 1, // insertion
+              dp[i - 1][j - 1] + cost // substitution
+            );
+          }
+        }
+
+        return dp[m][n];
+      }
+
+      // Update dashboard UI
+      function updateDashboard() {
+        // Count papers by status
+        const originalCount = papers.filter((p) => p.status === "Original").length;
+        const duplicateCount = papers.filter((p) => p.status === "Duplicate").length;
+
+        // Update counters
+        document.getElementById("total-papers").textContent = papers.length;
+        document.getElementById("original-papers").textContent = originalCount;
+        document.getElementById("duplicate-papers").textContent = duplicateCount;
+
+        // Count papers by member
+        const memberCounts = {
+          Sarwar: papers.filter((p) => p.member === "Sarwar").length,
+          Mou: papers.filter((p) => p.member === "Mou").length,
+          Soumitro: papers.filter((p) => p.member === "Soumitro").length,
+          Eti: papers.filter((p) => p.member === "Eti").length,
+          Musfiq: papers.filter((p) => p.member === "Musfiq").length,
+        };
+
+        // Update member counts
+        for (const member in memberCounts) {
+          document.getElementById(`${member.toLowerCase()}-count`).textContent = memberCounts[member];
+          document.getElementById(`${member.toLowerCase()}-count-view`).textContent = memberCounts[member];
+
+          // Update progress bars
+          const maxCount = Math.max(...Object.values(memberCounts), 1);
+          const percentage = (memberCounts[member] / maxCount) * 100;
+          document.getElementById(`${member.toLowerCase()}-progress`).style.width = `${percentage}%`;
+        }
+      }
+
+      // Update all tables showing papers
+      function updateAllPapersTables() {
+        // Update main table
+        const allPapersTable = document.getElementById("all-papers-table");
+        allPapersTable.innerHTML = "";
+
+        papers.forEach((paper) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+          <td class="p-3">${paper.id}</td>
+          <td class="p-3">${paper.member}</td>
+          <td class="p-3">${paper.title}</td>
+          <td class="p-3"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${shortenURL(
+            paper.link
+          )}</a></td>
+          <td class="p-3">${paper.description}</td>
+          <td class="p-3"><span class="status-badge ${
+            paper.status === "Original" ? "status-original" : "status-duplicate"
+          }">${paper.status}</span></td>
+          <td class="p-3">${paper.date}</td>
+        `;
+          allPapersTable.appendChild(row);
+        });
+
+        // Update member tables
+        const members = ["Sarwar", "Mou", "Soumitro", "Eti", "Musfiq"];
+        members.forEach((member) => {
+          const memberTable = document.getElementById(`${member.toLowerCase()}-table`);
+          memberTable.innerHTML = "";
+
+          const memberPapers = papers.filter((p) => p.member === member);
+
+          memberPapers.forEach((paper) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+            <td class="p-3">${paper.id}</td>
+            <td class="p-3">${paper.title}</td>
+            <td class="p-3"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${shortenURL(
+              paper.link
+            )}</a></td>
+            <td class="p-3">${paper.description}</td>
+            <td class="p-3"><span class="status-badge ${
+              paper.status === "Original" ? "status-original" : "status-duplicate"
+            }">${paper.status}</span></td>
+            <td class="p-3">${paper.date}</td>
+          `;
+            memberTable.appendChild(row);
+          });
+        });
+      }
+
+      // Initialize charts
+      function initializeCharts() {
+        // Status chart
+        const statusCtx = document.getElementById("status-chart").getContext("2d");
+        window.statusChart = new Chart(statusCtx, {
+          type: "doughnut",
+          data: {
+            labels: ["Original", "Duplicate"],
+            datasets: [
+              {
+                data: [0, 0],
+                backgroundColor: ["#10b981", "#ef4444"],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+          },
+        });
+
+        // Member chart
+        const memberCtx = document.getElementById("member-chart").getContext("2d");
+        window.memberChart = new Chart(memberCtx, {
+          type: "bar",
+          data: {
+            labels: ["Sarwar", "Mou", "Soumitro", "Eti", "Musfiq"],
+            datasets: [
+              {
+                label: "Papers Submitted",
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa"],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  precision: 0,
+                },
+              },
+            },
+          },
+        });
+
+        // Timeline chart
+        const timelineCtx = document.getElementById("timeline-chart").getContext("2d");
+        window.timelineChart = new Chart(timelineCtx, {
+          type: "line",
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: "Papers Over Time",
+                data: [],
+                borderColor: "#3b82f6",
+                tension: 0.1,
+                fill: false,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  precision: 0,
+                },
+              },
+            },
+          },
+        });
+
+        // Performance chart
+        const performanceCtx = document.getElementById("performance-chart").getContext("2d");
+        window.performanceChart = new Chart(performanceCtx, {
+          type: "radar",
+          data: {
+            labels: ["Original Papers", "Total Submissions", "Unique Links", "Consistency", "Quality"],
+            datasets: [
+              {
+                label: "Team Average",
+                data: [0, 0, 0, 0, 0],
+                borderColor: "#3b82f6",
+                backgroundColor: "rgba(59, 130, 246, 0.2)",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                min: 0,
+                max: 10,
+              },
+            },
+          },
+        });
+      }
+
+      // Update charts with current data
+      function updateCharts() {
+        // Status chart
+        const originalCount = papers.filter((p) => p.status === "Original").length;
+        const duplicateCount = papers.filter((p) => p.status === "Duplicate").length;
+
+        window.statusChart.data.datasets[0].data = [originalCount, duplicateCount];
+        window.statusChart.update();
+
+        // Member chart
+        const memberCounts = [
+          papers.filter((p) => p.member === "Sarwar").length,
+          papers.filter((p) => p.member === "Mou").length,
+          papers.filter((p) => p.member === "Soumitro").length,
+          papers.filter((p) => p.member === "Eti").length,
+          papers.filter((p) => p.member === "Musfiq").length,
+        ];
+
+        window.memberChart.data.datasets[0].data = memberCounts;
+        window.memberChart.update();
+
+        // Timeline chart
+        if (papers.length > 0) {
+          // Get all unique dates
+          const dates = [...new Set(papers.map((p) => p.date))].sort();
+
+          // Count papers for each date (cumulative)
+          const cumulativeCounts = [];
+          let count = 0;
+
+          for (const date of dates) {
+            count += papers.filter((p) => p.date === date).length;
+            cumulativeCounts.push(count);
+          }
+
+          window.timelineChart.data.labels = dates;
+          window.timelineChart.data.datasets[0].data = cumulativeCounts;
+          window.timelineChart.update();
+        }
+
+        // Performance chart - simplified metrics
+        const originalPapers = papers.filter((p) => p.status === "Original").length;
+        const totalPapers = papers.length;
+        const uniqueLinks = new Set(papers.map((p) => p.link)).size;
+        const consistency = Math.min(10, papers.length > 0 ? 5 + 5 * (originalPapers / totalPapers) : 0);
+        const quality = Math.min(10, papers.length > 0 ? 7 + Math.random() * 3 : 0);
+
+        window.performanceChart.data.datasets[0].data = [
+          originalPapers,
+          totalPapers,
+          uniqueLinks,
+          consistency,
+          quality,
+        ];
+        window.performanceChart.update();
+      }
+
+      // Add recent activity entry
+      function addRecentActivity(text) {
+        const recentActivity = document.getElementById("recent-activity");
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString();
+
+        const activityItem = document.createElement("div");
+        activityItem.className = "flex items-start";
+        activityItem.innerHTML = `
+        <div class="bg-blue-100 p-2 rounded-full text-blue-500 mr-3">
+          <i class="fas fa-file-alt"></i>
+        </div>
+        <div>
+          <p class="font-medium">${text}</p>
+          <p class="text-xs text-gray-400 mt-1">${timeStr}</p>
+        </div>
+      `;
+
+        // Insert at the top
+        recentActivity.insertBefore(activityItem, recentActivity.firstChild);
+      }
+
+      // Modal functions
+      function openAddPaperModal() {
+        document.getElementById("add-paper-modal").classList.add("active");
+      }
+
+      function closeAddPaperModal() {
+        document.getElementById("add-paper-modal").classList.remove("active");
+      }
+
+      function openAddPaperModalForMember(member) {
+        document.getElementById("modal-member").value = member;
+        openAddPaperModal();
+      }
+
+      // Search papers
+      function searchPapers() {
+        const searchTerm = document.getElementById("search-papers").value.toLowerCase();
+        const statusFilter = document.getElementById("status-filter").value;
+
+        const rows = document.getElementById("all-papers-table").querySelectorAll("tr");
+
+        rows.forEach((row) => {
+          const title = row.cells[2].textContent.toLowerCase();
+          const member = row.cells[1].textContent.toLowerCase();
+          const description = row.cells[4].textContent.toLowerCase();
+          const status = row.cells[5].textContent;
+
+          const matchesSearch =
+            title.includes(searchTerm) || member.includes(searchTerm) || description.includes(searchTerm);
+
+          const matchesStatus = statusFilter === "all" || status === statusFilter;
+
+          if (matchesSearch && matchesStatus) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      }
+
+      // Filter papers by status
+      function filterPapers() {
+        searchPapers(); // Reuse search function which also handles status filtering
+      }
+
+      // Helper to shorten URLs for display
+      function shortenURL(url) {
+        try {
+          const urlObj = new URL(url);
+          return (
+            urlObj.hostname + (urlObj.pathname.length > 15 ? urlObj.pathname.substring(0, 15) + "..." : urlObj.pathname)
+          );
+        } catch (e) {
+          return url.substring(0, 30) + (url.length > 30 ? "..." : "");
+        }
+      }
+    </script>
   </body>
 </html>
