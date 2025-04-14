@@ -35,9 +35,11 @@ const Paper = mongoose.model("Paper", paperSchema);
 app.get("/papers", async (req, res) => {
   try {
     const papers = await Paper.find().sort({ id: 1 });
-    res.json(papers);
+    console.log("Fetched papers:", papers); // Debug log
+    res.json(papers || []); // Ensure array, even if empty
   } catch (err) {
-    res.status(500).json({ error: "Failed to fetch papers" });
+    console.error("Error fetching papers:", err);
+    res.status(500).json({ error: "Failed to fetch papers", details: err.message });
   }
 });
 
@@ -66,10 +68,12 @@ app.post("/papers", async (req, res) => {
 
     const paper = new Paper({ id, member, title, link, description, status, dateAdded });
     await paper.save();
+    console.log("Added paper:", paper); // Debug log
 
     res.status(201).json(paper);
   } catch (err) {
-    res.status(500).json({ error: "Failed to add paper" });
+    console.error("Error adding paper:", err);
+    res.status(500).json({ error: "Failed to add paper", details: err.message });
   }
 });
 
@@ -92,10 +96,12 @@ app.post("/check-duplicates", async (req, res) => {
       if (oldStatus !== papers[i].status && isDuplicate) duplicatesFound++;
       await papers[i].save();
     }
+    console.log("Checked duplicates, found:", duplicatesFound); // Debug log
 
     res.json({ duplicatesFound });
   } catch (err) {
-    res.status(500).json({ error: "Failed to check duplicates" });
+    console.error("Error checking duplicates:", err);
+    res.status(500).json({ error: "Failed to check duplicates", details: err.message });
   }
 });
 
