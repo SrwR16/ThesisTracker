@@ -1,0 +1,49 @@
+.nav-btn {
+  background: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.nav-btn:hover {
+  background-color: #1e40af;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #e5e7eb;
+  text-align: left;
+}
+
+tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.status-original {
+  background-color: #c6efce;
+  color: #006100;
+  padding: 4px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.status-duplicate {
+  background-color: #ffcccc;
+  color: #9b1c1c;
+  padding: 4px;
+  border-radius: 4px;
+  text-align: center;
+}

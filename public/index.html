@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thesis Review Tracker</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="bg-gray-100 font-sans">
+    <!-- Navigation -->
+    <nav class="bg-blue-900 text-white p-4">
+      <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold">Thesis Review Tracker</h1>
+        <div class="space-x-4">
+          <button onclick="showView('dashboard')" class="nav-btn">Dashboard</button>
+          <button onclick="showView('all-papers')" class="nav-btn">All Papers</button>
+          <button onclick="showView('sarwar')" class="nav-btn">Sarwar</button>
+          <button onclick="showView('mou')" class="nav-btn">Mou</button>
+          <button onclick="showView('soumitro')" class="nav-btn">Soumitro</button>
+          <button onclick="showView('eti')" class="nav-btn">Eti</button>
+          <button onclick="showView('musfiq')" class="nav-btn">Musfiq</button>
+          <button onclick="showView('charts')" class="nav-btn">Charts</button>
+          <button onclick="showView('add-paper')" class="nav-btn">Add Paper</button>
+          <button onclick="showView('help')" class="nav-btn">Help</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Content -->
+    <div class="container mx-auto p-4">
+      <!-- Views -->
+      <div id="dashboard" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Dashboard</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold text-blue-700">Papers Summary</h3>
+            <p><b>Total Papers:</b> <span id="total-papers">0</span></p>
+            <p><b>Original Papers:</b> <span id="original-papers">0</span></p>
+            <p><b>Duplicate Papers:</b> <span id="duplicate-papers">0</span></p>
+          </div>
+          <div class="bg-white p-4 rounded shadow">
+            <h3 class="text-lg font-semibold text-blue-700">Member Summary</h3>
+            <p>Sarwar: <span id="sarwar-count">0</span></p>
+            <p>Mou: <span id="mou-count">0</span></p>
+            <p>Soumitro: <span id="soumitro-count">0</span></p>
+            <p>Eti: <span id="eti-count">0</span></p>
+            <p>Musfiq: <span id="musfiq-count">0</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div id="all-papers" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">All Papers</h2>
+        <button onclick="checkDuplicates()" class="bg-blue-600 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">
+          Check Duplicates
+        </button>
+        <table class="w-full bg-white rounded shadow">
+          <thead>
+            <tr class="bg-blue-900 text-white">
+              <th class="p-2">ID</th>
+              <th class="p-2">Member</th>
+              <th class="p-2">Paper Title</th>
+              <th class="p-2">Paper Link</th>
+              <th class="p-2">Description</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Date Added</th>
+            </tr>
+          </thead>
+          <tbody id="all-papers-table"></tbody>
+        </table>
+      </div>
+
+      <!-- Member Views -->
+      <div id="sarwar" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Sarwar's Papers</h2>
+        <table class="w-full bg-white rounded shadow">
+          <thead>
+            <tr class="bg-blue-900 text-white">
+              <th class="p-2">ID</th>
+              <th class="p-2">Paper Title</th>
+              <th class="p-2">Paper Link</th>
+              <th class="p-2">Description</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Date Added</th>
+            </tr>
+          </thead>
+          <tbody id="sarwar-table"></tbody>
+        </table>
+      </div>
+      <div id="mou" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Mou's Papers</h2>
+        <table class="w-full bg-white rounded shadow">
+          <thead>
+            <tr class="bg-blue-900 text-white">
+              <th class="p-2">ID</th>
+              <th class="p-2">Paper Title</th>
+              <th class="p-2">Paper Link</th>
+              <th class="p-2">Description</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Date Added</th>
+            </tr>
+          </thead>
+          <tbody id="mou-table"></tbody>
+        </table>
+      </div>
+      <div id="soumitro" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Soumitro's Papers</h2>
+        <table class="w-full bg-white rounded shadow">
+          <thead>
+            <tr class="bg-blue-900 text-white">
+              <th class="p-2">ID</th>
+              <th class="p-2">Paper Title</th>
+              <th class="p-2">Paper Link</th>
+              <th class="p-2">Description</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Date Added</th>
+            </tr>
+          </thead>
+          <tbody id="soumitro-table"></tbody>
+        </table>
+      </div>
+      <div id="eti" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Eti's Papers</h2>
+        <table class="w-full bg-white rounded shadow">
+          <thead>
+            <tr class="bg-blue-900 text-white">
+              <th class="p-2">ID</th>
+              <th class="p-2">Paper Title</th>
+              <th class="p-2">Paper Link</th>
+              <th class="p-2">Description</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Date Added</th>
+            </tr>
+          </thead>
+          <tbody id="eti-table"></tbody>
+        </table>
+      </div>
+      <div id="musfiq" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Musfiq's Papers</h2>
+        <table class="w-full bg-white rounded shadow">
+          <thead>
+            <tr class="bg-blue-900 text-white">
+              <th class="p-2">ID</th>
+              <th class="p-2">Paper Title</th>
+              <th class="p-2">Paper Link</th>
+              <th class="p-2">Description</th>
+              <th class="p-2">Status</th>
+              <th class="p-2">Date Added</th>
+            </tr>
+          </thead>
+          <tbody id="musfiq-table"></tbody>
+        </table>
+      </div>
+
+      <div id="charts" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Charts</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h3 class="text-lg font-semibold text-blue-700">Duplicate Status</h3>
+            <canvas id="status-chart"></canvas>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-blue-700">Papers by Member</h3>
+            <canvas id="member-chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div id="add-paper" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Add New Paper</h2>
+        <form id="paper-form" class="bg-white p-4 rounded shadow max-w-lg">
+          <div class="mb-4">
+            <label for="member" class="block font-semibold">Member</label>
+            <select id="member" class="w-full p-2 border rounded" required>
+              <option value="">Select Member</option>
+              <option value="Sarwar">Sarwar</option>
+              <option value="Mou">Mou</option>
+              <option value="Soumitro">Soumitro</option>
+              <option value="Eti">Eti</option>
+              <option value="Musfiq">Musfiq</option>
+            </select>
+          </div>
+          <div class="mb-4">
+            <label for="paper-title" class="block font-semibold">Paper Title</label>
+            <input type="text" id="paper-title" class="w-full p-2 border rounded" required />
+          </div>
+          <div class="mb-4">
+            <label for="paper-link" class="block font-semibold">Paper Link</label>
+            <input type="url" id="paper-link" class="w-full p-2 border rounded" required />
+          </div>
+          <div class="mb-4">
+            <label for="description" class="block font-semibold">Description</label>
+            <textarea id="description" class="w-full p-2 border rounded" rows="4"></textarea>
+          </div>
+          <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Paper</button>
+        </form>
+      </div>
+
+      <div id="help" class="view hidden">
+        <h2 class="text-2xl font-bold text-blue-900 mb-4">Help</h2>
+        <div class="bg-white p-4 rounded shadow">
+          <h3 class="text-lg font-semibold text-blue-700">Overview</h3>
+          <ul class="list-disc pl-5">
+            <li><b>Dashboard</b>: View total, original, and duplicate paper counts.</li>
+            <li><b>All Papers</b>: Lists all papers with duplicate status.</li>
+            <li><b>Member Pages</b>: View individual member's papers.</li>
+            <li><b>Charts</b>: Visualize duplicate status and member distribution.</li>
+          </ul>
+          <h3 class="text-lg font-semibold text-blue-700 mt-4">Adding Papers</h3>
+          <ul class="list-disc pl-5">
+            <li>Click "Add Paper" and fill in member, title, link, and optional description.</li>
+            <li>Duplicates are flagged automatically (green for Original, red for Duplicate).</li>
+          </ul>
+          <h3 class="text-lg font-semibold text-blue-700 mt-4">Managing Duplicates</h3>
+          <ul class="list-disc pl-5">
+            <li>Click "Check Duplicates" on All Papers to update statuses.</li>
+          </ul>
+          <h3 class="text-lg font-semibold text-blue-700 mt-4">Data Storage</h3>
+          <ul class="list-disc pl-5">
+            <li>Data is saved automatically to data.json in the app folder.</li>
+            <li>Backup data.json regularly to avoid data loss.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
