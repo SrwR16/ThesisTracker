@@ -854,520 +854,189 @@
       </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
-      // Data storage
-      let papers = [];
-      let nextId = 1;
+      // ================== Configuration ==================
+      const members = ["Sarwar", "Mou", "Soumitro", "Eti", "Musfiq"];
 
-      // Initialize active view
-      document.addEventListener("DOMContentLoaded", function () {
-        showView("dashboard");
+      // ================== Initialization ==================
+      document.addEventListener("DOMContentLoaded", () => {
+        fetchPapers();
 
-        // Set up form submissions
-        document.getElementById("paper-form").addEventListener("submit", function (e) {
-          e.preventDefault();
-          addPaper();
-        });
+        document.getElementById("paper-form").addEventListener("submit", handleSubmit);
+        document.getElementById("check-duplicates").addEventListener("click", checkDuplicates);
 
-        document.getElementById("modal-paper-form").addEventListener("submit", function (e) {
-          e.preventDefault();
-          addPaperFromModal();
-        });
-
-        // Initialize charts
-        initializeCharts();
-      });
-
-      // View switching
-      function showView(viewId) {
-        // Hide all views
-        const views = document.querySelectorAll(".view");
-        views.forEach((view) => view.classList.remove("active"));
-
-        // Show selected view
-        document.getElementById(viewId).classList.add("active");
-
-        // Update page title
-        document.getElementById("page-title").textContent = viewId
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (l) => l.toUpperCase());
-
-        // Update active nav link
-        const navLinks = document.querySelectorAll(".nav-link");
-        navLinks.forEach((link) => link.classList.remove("active"));
-        document.querySelector(`.nav-link[data-view="${viewId}"]`).classList.add("active");
-
-        // Refresh data if needed
-        updateDashboard();
-        updateAllPapersTables();
-        updateCharts();
-      }
-
-      // Add paper from the form
-      function addPaper() {
-        const member = document.getElementById("member").value;
-        const title = document.getElementById("paper-title").value;
-        const link = document.getElementById("paper-link").value;
-        const description = document.getElementById("paper-description").value;
-
-        if (!member || !title || !link) {
-          alert("Please fill in all required fields");
-          return;
-        }
-
-        const newPaper = {
-          id: nextId++,
-          member,
-          title,
-          link,
-          description,
-          status: "Original", // Will be checked later
-          date: new Date().toISOString().split("T")[0],
-        };
-
-        papers.push(newPaper);
-        checkDuplicates();
-
-        // Reset form
-        document.getElementById("paper-form").reset();
-
-        // Show success message
-        alert("Paper added successfully!");
-
-        // Update UI
-        addRecentActivity(`${member} added a new paper: "${title}"`);
-        updateDashboard();
-        updateAllPapersTables();
-        updateCharts();
-
-        // Go to dashboard
-        showView("dashboard");
-      }
-
-      // Add paper from modal
-      function addPaperFromModal() {
-        const member = document.getElementById("modal-member").value;
-        const title = document.getElementById("modal-paper-title").value;
-        const link = document.getElementById("modal-paper-link").value;
-        const description = document.getElementById("modal-paper-description").value;
-
-        if (!member || !title || !link) {
-          alert("Please fill in all required fields");
-          return;
-        }
-
-        const newPaper = {
-          id: nextId++,
-          member,
-          title,
-          link,
-          description,
-          status: "Original", // Will be checked later
-          date: new Date().toISOString().split("T")[0],
-        };
-
-        papers.push(newPaper);
-        checkDuplicates();
-
-        // Reset form and close modal
-        document.getElementById("modal-paper-form").reset();
-        closeAddPaperModal();
-
-        // Show success message
-        alert("Paper added successfully!");
-
-        // Update UI
-        addRecentActivity(`${member} added a new paper: "${title}"`);
-        updateDashboard();
-        updateAllPapersTables();
-        updateCharts();
-      }
-
-      // Check for duplicate papers
-      function checkDuplicates() {
-        // Simple check based on title or link
-        for (let i = 0; i < papers.length; i++) {
-          papers[i].status = "Original"; // Reset status
-
-          for (let j = 0; j < i; j++) {
-            const titleSimilarity = calculateSimilarity(papers[i].title.toLowerCase(), papers[j].title.toLowerCase());
-            const linkMatch = papers[i].link === papers[j].link;
-
-            if (titleSimilarity > 0.8 || linkMatch) {
-              papers[i].status = "Duplicate";
-              addRecentActivity(`Detected duplicate: "${papers[i].title}" (submitted by ${papers[i].member})`);
-              break;
-            }
-          }
-        }
-
-        updateDashboard();
-        updateAllPapersTables();
-        updateCharts();
-      }
-
-      // Simple string similarity function (Levenshtein-based)
-      function calculateSimilarity(str1, str2) {
-        if (str1 === str2) return 1.0;
-        if (str1.length === 0 || str2.length === 0) return 0.0;
-
-        const distance = levenshteinDistance(str1, str2);
-        return 1 - distance / Math.max(str1.length, str2.length);
-      }
-
-      function levenshteinDistance(str1, str2) {
-        const m = str1.length;
-        const n = str2.length;
-
-        // Create a matrix of size (m+1) x (n+1)
-        const dp = Array(m + 1)
-          .fill()
-          .map(() => Array(n + 1).fill(0));
-
-        // Initialize the matrix
-        for (let i = 0; i <= m; i++) dp[i][0] = i;
-        for (let j = 0; j <= n; j++) dp[0][j] = j;
-
-        // Fill the matrix
-        for (let i = 1; i <= m; i++) {
-          for (let j = 1; j <= n; j++) {
-            const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-            dp[i][j] = Math.min(
-              dp[i - 1][j] + 1, // deletion
-              dp[i][j - 1] + 1, // insertion
-              dp[i - 1][j - 1] + cost // substitution
-            );
-          }
-        }
-
-        return dp[m][n];
-      }
-
-      // Update dashboard UI
-      function updateDashboard() {
-        // Count papers by status
-        const originalCount = papers.filter((p) => p.status === "Original").length;
-        const duplicateCount = papers.filter((p) => p.status === "Duplicate").length;
-
-        // Update counters
-        document.getElementById("total-papers").textContent = papers.length;
-        document.getElementById("original-papers").textContent = originalCount;
-        document.getElementById("duplicate-papers").textContent = duplicateCount;
-
-        // Count papers by member
-        const memberCounts = {
-          Sarwar: papers.filter((p) => p.member === "Sarwar").length,
-          Mou: papers.filter((p) => p.member === "Mou").length,
-          Soumitro: papers.filter((p) => p.member === "Soumitro").length,
-          Eti: papers.filter((p) => p.member === "Eti").length,
-          Musfiq: papers.filter((p) => p.member === "Musfiq").length,
-        };
-
-        // Update member counts
-        for (const member in memberCounts) {
-          document.getElementById(`${member.toLowerCase()}-count`).textContent = memberCounts[member];
-          document.getElementById(`${member.toLowerCase()}-count-view`).textContent = memberCounts[member];
-
-          // Update progress bars
-          const maxCount = Math.max(...Object.values(memberCounts), 1);
-          const percentage = (memberCounts[member] / maxCount) * 100;
-          document.getElementById(`${member.toLowerCase()}-progress`).style.width = `${percentage}%`;
-        }
-      }
-
-      // Update all tables showing papers
-      function updateAllPapersTables() {
-        // Update main table
-        const allPapersTable = document.getElementById("all-papers-table");
-        allPapersTable.innerHTML = "";
-
-        papers.forEach((paper) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-          <td class="p-3">${paper.id}</td>
-          <td class="p-3">${paper.member}</td>
-          <td class="p-3">${paper.title}</td>
-          <td class="p-3"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${shortenURL(
-            paper.link
-          )}</a></td>
-          <td class="p-3">${paper.description}</td>
-          <td class="p-3"><span class="status-badge ${
-            paper.status === "Original" ? "status-original" : "status-duplicate"
-          }">${paper.status}</span></td>
-          <td class="p-3">${paper.date}</td>
-        `;
-          allPapersTable.appendChild(row);
-        });
-
-        // Update member tables
-        const members = ["Sarwar", "Mou", "Soumitro", "Eti", "Musfiq"];
-        members.forEach((member) => {
-          const memberTable = document.getElementById(`${member.toLowerCase()}-table`);
-          memberTable.innerHTML = "";
-
-          const memberPapers = papers.filter((p) => p.member === member);
-
-          memberPapers.forEach((paper) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-            <td class="p-3">${paper.id}</td>
-            <td class="p-3">${paper.title}</td>
-            <td class="p-3"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${shortenURL(
-              paper.link
-            )}</a></td>
-            <td class="p-3">${paper.description}</td>
-            <td class="p-3"><span class="status-badge ${
-              paper.status === "Original" ? "status-original" : "status-duplicate"
-            }">${paper.status}</span></td>
-            <td class="p-3">${paper.date}</td>
-          `;
-            memberTable.appendChild(row);
+        document.querySelectorAll(".nav-link").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const view = btn.getAttribute("data-view");
+            showView(view);
           });
         });
+
+        showView("dashboard");
+      });
+
+      // ================== Fetch & Submission ==================
+      async function fetchPapers() {
+        try {
+          const response = await fetch("/papers");
+          const papers = await response.json();
+          updateUI(papers);
+        } catch (err) {
+          console.error("Error fetching papers:", err);
+          alert("Could not load papers.");
+          updateUI([]);
+        }
       }
 
-      // Initialize charts
-      function initializeCharts() {
-        // Status chart
+      async function handleSubmit(e) {
+        e.preventDefault();
+        const form = e.target;
+        const paper = {
+          member: form.member.value.trim(),
+          title: form["paper-title"].value.trim(),
+          link: form["paper-link"].value.trim(),
+          description: form.description.value.trim(),
+        };
+
+        if (!paper.member || !paper.title || !paper.link) {
+          alert("Please fill in all required fields.");
+          return;
+        }
+
+        try {
+          const res = await fetch("/papers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(paper),
+          });
+          if (!res.ok) throw new Error("Failed to submit paper");
+          await fetchPapers();
+          form.reset();
+          alert("Paper added successfully!");
+          showView("all-papers");
+        } catch (err) {
+          console.error("Submission failed:", err);
+          alert("Error submitting paper.");
+        }
+      }
+
+      async function checkDuplicates() {
+        try {
+          const res = await fetch("/check-duplicates", { method: "POST" });
+          const data = await res.json();
+          await fetchPapers();
+          alert(data.duplicatesFound > 0 ? `${data.duplicatesFound} duplicate(s) found!` : "No duplicates detected.");
+        } catch (err) {
+          console.error("Duplicate check failed:", err);
+          alert("Could not check for duplicates.");
+        }
+      }
+
+      // ================== UI Helpers ==================
+      function showView(viewId) {
+        document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+        document.getElementById(viewId).classList.add("active");
+      }
+
+      function updateUI(papers) {
+        updateDashboard(papers);
+        updateAllPapers(papers);
+        members.forEach((m) => updateMemberTable(m, papers));
+        updateCharts(papers);
+      }
+
+      function updateDashboard(papers) {
+        const originals = papers.filter((p) => p.status === "Original").length;
+        const duplicates = papers.filter((p) => p.status === "Duplicate").length;
+
+        document.getElementById("total-papers").textContent = papers.length;
+        document.getElementById("original-papers").textContent = originals;
+        document.getElementById("duplicate-papers").textContent = duplicates;
+
+        members.forEach((m) => {
+          const count = papers.filter((p) => p.member === m).length;
+          document.getElementById(`${m.toLowerCase()}-count`).textContent = count;
+        });
+      }
+
+      function updateAllPapers(papers) {
+        const tbody = document.getElementById("all-papers-table");
+        tbody.innerHTML = "";
+        papers.forEach((p) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+      <td class="p-2">${p.id}</td>
+      <td class="p-2">${p.member}</td>
+      <td class="p-2">${p.title}</td>
+      <td class="p-2"><a href="${p.link}" target="_blank" class="text-blue-600 underline">${p.link}</a></td>
+      <td class="p-2">${p.description || ""}</td>
+      <td class="p-2 status-${p.status.toLowerCase()}">${p.status}</td>
+      <td class="p-2">${p.dateAdded}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function updateMemberTable(member, papers) {
+        const tbody = document.getElementById(`${member.toLowerCase()}-table`);
+        tbody.innerHTML = "";
+        papers
+          .filter((p) => p.member === member)
+          .forEach((p) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+      <td class="p-2">${p.id}</td>
+      <td class="p-2">${p.title}</td>
+      <td class="p-2"><a href="${p.link}" target="_blank" class="text-blue-600 underline">${p.link}</a></td>
+      <td class="p-2">${p.description || ""}</td>
+      <td class="p-2 status-${p.status.toLowerCase()}">${p.status}</td>
+      <td class="p-2">${p.dateAdded}</td>`;
+            tbody.appendChild(tr);
+          });
+      }
+
+      // ================== Charts ==================
+      function updateCharts(papers) {
+        if (window.statusChart) window.statusChart.destroy();
+        if (window.memberChart) window.memberChart.destroy();
+
         const statusCtx = document.getElementById("status-chart").getContext("2d");
         window.statusChart = new Chart(statusCtx, {
-          type: "doughnut",
+          type: "pie",
           data: {
             labels: ["Original", "Duplicate"],
             datasets: [
               {
-                data: [0, 0],
-                backgroundColor: ["#10b981", "#ef4444"],
+                data: [
+                  papers.filter((p) => p.status === "Original").length,
+                  papers.filter((p) => p.status === "Duplicate").length,
+                ],
+                backgroundColor: ["#c6efce", "#ffcccc"],
               },
             ],
           },
           options: {
+            plugins: { title: { display: true, text: "Status Breakdown" } },
             responsive: true,
-            maintainAspectRatio: false,
           },
         });
 
-        // Member chart
         const memberCtx = document.getElementById("member-chart").getContext("2d");
         window.memberChart = new Chart(memberCtx, {
-          type: "bar",
+          type: "pie",
           data: {
-            labels: ["Sarwar", "Mou", "Soumitro", "Eti", "Musfiq"],
+            labels: members,
             datasets: [
               {
-                label: "Papers Submitted",
-                data: [0, 0, 0, 0, 0],
+                data: members.map((m) => papers.filter((p) => p.member === m).length),
                 backgroundColor: ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa"],
               },
             ],
           },
           options: {
+            plugins: { title: { display: true, text: "Papers per Member" } },
             responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  precision: 0,
-                },
-              },
-            },
           },
         });
-
-        // Timeline chart
-        const timelineCtx = document.getElementById("timeline-chart").getContext("2d");
-        window.timelineChart = new Chart(timelineCtx, {
-          type: "line",
-          data: {
-            labels: [],
-            datasets: [
-              {
-                label: "Papers Over Time",
-                data: [],
-                borderColor: "#3b82f6",
-                tension: 0.1,
-                fill: false,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  precision: 0,
-                },
-              },
-            },
-          },
-        });
-
-        // Performance chart
-        const performanceCtx = document.getElementById("performance-chart").getContext("2d");
-        window.performanceChart = new Chart(performanceCtx, {
-          type: "radar",
-          data: {
-            labels: ["Original Papers", "Total Submissions", "Unique Links", "Consistency", "Quality"],
-            datasets: [
-              {
-                label: "Team Average",
-                data: [0, 0, 0, 0, 0],
-                borderColor: "#3b82f6",
-                backgroundColor: "rgba(59, 130, 246, 0.2)",
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-              r: {
-                min: 0,
-                max: 10,
-              },
-            },
-          },
-        });
-      }
-
-      // Update charts with current data
-      function updateCharts() {
-        // Status chart
-        const originalCount = papers.filter((p) => p.status === "Original").length;
-        const duplicateCount = papers.filter((p) => p.status === "Duplicate").length;
-
-        window.statusChart.data.datasets[0].data = [originalCount, duplicateCount];
-        window.statusChart.update();
-
-        // Member chart
-        const memberCounts = [
-          papers.filter((p) => p.member === "Sarwar").length,
-          papers.filter((p) => p.member === "Mou").length,
-          papers.filter((p) => p.member === "Soumitro").length,
-          papers.filter((p) => p.member === "Eti").length,
-          papers.filter((p) => p.member === "Musfiq").length,
-        ];
-
-        window.memberChart.data.datasets[0].data = memberCounts;
-        window.memberChart.update();
-
-        // Timeline chart
-        if (papers.length > 0) {
-          // Get all unique dates
-          const dates = [...new Set(papers.map((p) => p.date))].sort();
-
-          // Count papers for each date (cumulative)
-          const cumulativeCounts = [];
-          let count = 0;
-
-          for (const date of dates) {
-            count += papers.filter((p) => p.date === date).length;
-            cumulativeCounts.push(count);
-          }
-
-          window.timelineChart.data.labels = dates;
-          window.timelineChart.data.datasets[0].data = cumulativeCounts;
-          window.timelineChart.update();
-        }
-
-        // Performance chart - simplified metrics
-        const originalPapers = papers.filter((p) => p.status === "Original").length;
-        const totalPapers = papers.length;
-        const uniqueLinks = new Set(papers.map((p) => p.link)).size;
-        const consistency = Math.min(10, papers.length > 0 ? 5 + 5 * (originalPapers / totalPapers) : 0);
-        const quality = Math.min(10, papers.length > 0 ? 7 + Math.random() * 3 : 0);
-
-        window.performanceChart.data.datasets[0].data = [
-          originalPapers,
-          totalPapers,
-          uniqueLinks,
-          consistency,
-          quality,
-        ];
-        window.performanceChart.update();
-      }
-
-      // Add recent activity entry
-      function addRecentActivity(text) {
-        const recentActivity = document.getElementById("recent-activity");
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString();
-
-        const activityItem = document.createElement("div");
-        activityItem.className = "flex items-start";
-        activityItem.innerHTML = `
-        <div class="bg-blue-100 p-2 rounded-full text-blue-500 mr-3">
-          <i class="fas fa-file-alt"></i>
-        </div>
-        <div>
-          <p class="font-medium">${text}</p>
-          <p class="text-xs text-gray-400 mt-1">${timeStr}</p>
-        </div>
-      `;
-
-        // Insert at the top
-        recentActivity.insertBefore(activityItem, recentActivity.firstChild);
-      }
-
-      // Modal functions
-      function openAddPaperModal() {
-        document.getElementById("add-paper-modal").classList.add("active");
-      }
-
-      function closeAddPaperModal() {
-        document.getElementById("add-paper-modal").classList.remove("active");
-      }
-
-      function openAddPaperModalForMember(member) {
-        document.getElementById("modal-member").value = member;
-        openAddPaperModal();
-      }
-
-      // Search papers
-      function searchPapers() {
-        const searchTerm = document.getElementById("search-papers").value.toLowerCase();
-        const statusFilter = document.getElementById("status-filter").value;
-
-        const rows = document.getElementById("all-papers-table").querySelectorAll("tr");
-
-        rows.forEach((row) => {
-          const title = row.cells[2].textContent.toLowerCase();
-          const member = row.cells[1].textContent.toLowerCase();
-          const description = row.cells[4].textContent.toLowerCase();
-          const status = row.cells[5].textContent;
-
-          const matchesSearch =
-            title.includes(searchTerm) || member.includes(searchTerm) || description.includes(searchTerm);
-
-          const matchesStatus = statusFilter === "all" || status === statusFilter;
-
-          if (matchesSearch && matchesStatus) {
-            row.style.display = "";
-          } else {
-            row.style.display = "none";
-          }
-        });
-      }
-
-      // Filter papers by status
-      function filterPapers() {
-        searchPapers(); // Reuse search function which also handles status filtering
-      }
-
-      // Helper to shorten URLs for display
-      function shortenURL(url) {
-        try {
-          const urlObj = new URL(url);
-          return (
-            urlObj.hostname + (urlObj.pathname.length > 15 ? urlObj.pathname.substring(0, 15) + "..." : urlObj.pathname)
-          );
-        } catch (e) {
-          return url.substring(0, 30) + (url.length > 30 ? "..." : "");
-        }
       }
     </script>
   </body>
