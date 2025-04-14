@@ -503,3 +503,40 @@ function shortenURL(url) {
     return url.substring(0, 30) + (url.length > 30 ? "..." : "");
   }
 }
+
+// Add this to your existing script.js file
+// Making sure the modal form submission closes the modal
+
+document.getElementById("modal-paper-form").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  // Get form values
+  const member = document.getElementById("modal-member").value;
+  const title = document.getElementById("modal-paper-title").value;
+  const link = document.getElementById("modal-paper-link").value;
+  const description = document.getElementById("modal-paper-description").value;
+
+  // Add the paper (assuming you have a function like this)
+  addPaper(member, title, link, description);
+
+  // Close the modal after submission
+  closeAddPaperModal();
+
+  // Reset the form
+  this.reset();
+});
+
+// If you don't already have the closeAddPaperModal function, define it:
+function closeAddPaperModal() {
+  document.getElementById("add-paper-modal").style.display = "none";
+}
+
+// And for opening the modal:
+function openAddPaperModal() {
+  document.getElementById("add-paper-modal").style.display = "flex";
+}
+
+function openAddPaperModalForMember(member) {
+  document.getElementById("modal-member").value = member;
+  openAddPaperModal();
+}
