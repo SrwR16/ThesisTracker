@@ -1,6 +1,6 @@
 {
   "name": "thesis-tracker",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "description": "Thesis Review Tracker",
   "main": "server.js",
   "scripts": {
