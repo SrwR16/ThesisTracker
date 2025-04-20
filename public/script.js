@@ -820,16 +820,16 @@ function closeDeletePaperModal() {
 // Function to update the Bangladesh time in the modal
 function updateBangladeshTime() {
   // Get current time in Bangladesh
-  const options = {
-    timeZone: "Asia/Dhaka",
-    hour12: true,
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  };
+  const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+  const bdTime = new Date(now);
 
-  const bdTime = new Date().toLocaleString("en-US", options);
-  document.getElementById("current-bd-time").textContent = `Current Bangladesh Time: ${bdTime}`;
+  const hours = bdTime.getHours().toString().padStart(2, "0");
+  const minutes = bdTime.getMinutes().toString().padStart(2, "0");
+  const currentCode = `${hours}${minutes}`;
+
+  document.getElementById(
+    "current-bd-time"
+  ).textContent = `Current Bangladesh Time: ${hours}:${minutes} (Verification Code: ${currentCode})`;
 
   // Update every second
   setTimeout(updateBangladeshTime, 1000);
@@ -884,8 +884,6 @@ document.getElementById("delete-paper-form").addEventListener("submit", async fu
     // Close the modal after 1 second
     setTimeout(() => {
       closeDeletePaperModal();
-
-      // Refresh the papers list
       fetchPapers();
     }, 1000);
   } else {
