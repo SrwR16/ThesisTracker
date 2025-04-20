@@ -149,8 +149,7 @@ function showView(viewId) {
 // Update all UI components
 function updateUI(papers) {
   updateDashboard(papers);
-  updateAllPapers(papers);
-  members.forEach((member) => updateMemberTable(member, papers));
+  updateTables(papers);
   updateCharts(papers);
 }
 
@@ -188,53 +187,114 @@ function updateDashboard(papers) {
 }
 
 // Update All Papers table
-function updateAllPapers(papers) {
-  const tbody = document.getElementById("all-papers-table");
-  if (!tbody) return;
+function populateAllPapersTable(papers) {
+  const tableBody = document.getElementById("all-papers-table");
+  tableBody.innerHTML = "";
 
-  tbody.innerHTML = "";
-  papers.forEach((paper) => {
+  if (papers.length === 0) {
     const row = document.createElement("tr");
     row.innerHTML = `
-      <td class="p-2">${paper.id}</td>
-      <td class="p-2">${paper.member}</td>
-      <td class="p-2">${paper.title}</td>
-      <td class="p-2"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${shortenURL(
-      paper.link
-    )}</a></td>
-      <td class="p-2">${paper.description || ""}</td>
-      <td class="p-2 status-${paper.status.toLowerCase()}"><span class="status-badge ${
-      paper.status === "Original" ? "status-original" : "status-duplicate"
-    }">${paper.status}</span></td>
-      <td class="p-2">${paper.dateAdded || paper.date}</td>
+      <td colspan="8" class="p-3 text-center text-gray-500">No papers found</td>
     `;
-    tbody.appendChild(row);
+    tableBody.appendChild(row);
+    return;
+  }
+
+  papers.forEach((paper) => {
+    const row = createTableRow(paper);
+    tableBody.appendChild(row);
+  });
+}
+// Update this function in your script.js to add a delete button for duplicate papers
+function createTableRow(paper) {
+  const row = document.createElement("tr");
+
+  // Create the status class
+  const statusClass = paper.status === "Original" ? "status-original" : "status-duplicate";
+
+  row.innerHTML = `
+    <td class="p-3">${paper.id}</td>
+    <td class="p-3">${paper.member}</td>
+    <td class="p-3">${paper.title}</td>
+    <td class="p-3"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${truncateText(
+    paper.link,
+    40
+  )}</a></td>
+    <td class="p-3">${paper.description || "N/A"}</td>
+    <td class="p-3"><span class="status-badge ${statusClass}">${paper.status}</span></td>
+    <td class="p-3">${paper.dateAdded}</td>
+    <td class="p-3">
+      ${
+        paper.status === "Duplicate"
+          ? `<button class="delete-btn text-red-600 hover:text-red-800" onclick="openDeletePaperModal(${
+              paper.id
+            }, '${paper.title.replace(/'/g, "\\'")}')" title="Delete duplicate paper">
+          <i class="fas fa-trash-alt"></i>
+        </button>`
+          : ""
+      }
+    </td>
+  `;
+
+  return row;
+}
+
+// Function to populate member-specific tables
+function populateMemberTable(member, papers) {
+  const tableId = `${member.toLowerCase()}-table`;
+  const tableBody = document.getElementById(tableId);
+  if (!tableBody) return;
+
+  tableBody.innerHTML = "";
+
+  const memberPapers = papers.filter((paper) => paper.member === member);
+
+  if (memberPapers.length === 0) {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td colspan="7" class="p-3 text-center text-gray-500">No papers found</td>
+    `;
+    tableBody.appendChild(row);
+    return;
+  }
+
+  memberPapers.forEach((paper) => {
+    const row = createMemberTableRow(paper);
+    tableBody.appendChild(row);
   });
 }
 
-// Update Member table
-function updateMemberTable(member, papers) {
-  const tbody = document.getElementById(`${member.toLowerCase()}-table`);
-  if (!tbody) return;
+// Modified function for member-specific tables, which don't show the member column
+function createMemberTableRow(paper) {
+  const row = document.createElement("tr");
 
-  tbody.innerHTML = "";
-  const memberPapers = papers.filter((p) => p.member === member);
-  memberPapers.forEach((paper) => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td class="p-2">${paper.id}</td>
-      <td class="p-2">${paper.title}</td>
-      <td class="p-2"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${shortenURL(
-      paper.link
-    )}</a></td>
-      <td class="p-2">${paper.description || ""}</td>
-      <td class="p-2 status-${paper.status.toLowerCase()}"><span class="status-badge ${
-      paper.status === "Original" ? "status-original" : "status-duplicate"
-    }">${paper.status}</span></td>
-      <td class="p-2">${paper.dateAdded || paper.date}</td>
-    `;
-    tbody.appendChild(row);
-  });
+  // Create the status class
+  const statusClass = paper.status === "Original" ? "status-original" : "status-duplicate";
+
+  row.innerHTML = `
+    <td class="p-3">${paper.id}</td>
+    <td class="p-3">${paper.title}</td>
+    <td class="p-3"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${truncateText(
+    paper.link,
+    40
+  )}</a></td>
+    <td class="p-3">${paper.description || "N/A"}</td>
+    <td class="p-3"><span class="status-badge ${statusClass}">${paper.status}</span></td>
+    <td class="p-3">${paper.dateAdded}</td>
+    <td class="p-3">
+      ${
+        paper.status === "Duplicate"
+          ? `<button class="delete-btn text-red-600 hover:text-red-800" onclick="openDeletePaperModal(${
+              paper.id
+            }, '${paper.title.replace(/'/g, "\\'")}')" title="Delete duplicate paper">
+          <i class="fas fa-trash-alt"></i>
+        </button>`
+          : ""
+      }
+    </td>
+  `;
+
+  return row;
 }
 
 // Initialize charts
@@ -450,6 +510,18 @@ function openAddPaperModal() {
 function closeAddPaperModal() {
   const modal = document.getElementById("add-paper-modal");
   if (modal) modal.classList.remove("active");
+}
+
+// Updated function to update all tables with latest data
+function updateTables(papers) {
+  // Update All Papers view
+  populateAllPapersTable(papers);
+
+  // Update member-specific views
+  const members = ["Sarwar", "Mou", "Soumitro", "Eti", "Musfiq"];
+  members.forEach((member) => {
+    populateMemberTable(member, papers);
+  });
 }
 
 function openAddPaperModalForMember(member) {
@@ -692,3 +764,110 @@ loadPapers = async function () {
   await originalLoadPapers();
   updateTableHeaders();
 };
+
+// Helper function to truncate long text with ellipsis
+function truncateText(text, maxLength) {
+  if (text.length <= maxLength) return text;
+  return text.substring(0, maxLength) + "...";
+}
+
+// Add these functions to your script.js file
+
+// Function to open the delete paper modal
+function openDeletePaperModal(paperId, paperTitle) {
+  // Set the paper ID and title in the modal
+  document.getElementById("delete-paper-id").value = paperId;
+  document.getElementById("delete-paper-title").textContent = paperTitle;
+
+  // Update the Bangladesh time in the modal
+  updateBangladeshTime();
+
+  // Show the modal
+  document.getElementById("delete-paper-modal").style.display = "flex";
+}
+
+// Function to close the delete paper modal
+function closeDeletePaperModal() {
+  document.getElementById("delete-paper-modal").style.display = "none";
+  // Clear the verification code
+  document.getElementById("verification-code").value = "";
+  document.getElementById("verification-message").textContent = "";
+  document.getElementById("verification-message").className = "";
+}
+
+// Function to update the Bangladesh time in the modal
+function updateBangladeshTime() {
+  // Get current time in Bangladesh
+  const options = {
+    timeZone: "Asia/Dhaka",
+    hour12: true,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  };
+
+  const bdTime = new Date().toLocaleString("en-US", options);
+  document.getElementById("current-bd-time").textContent = `Current Bangladesh Time: ${bdTime}`;
+
+  // Update every second
+  setTimeout(updateBangladeshTime, 1000);
+}
+
+// Function to delete a paper
+async function deletePaper(paperId, verificationCode) {
+  try {
+    const response = await fetch(`/papers/${paperId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ verificationCode }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Failed to delete paper");
+    }
+
+    // Return success
+    return { success: true, message: data.message };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
+}
+
+// Add event listener for the delete paper form
+document.getElementById("delete-paper-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const paperId = document.getElementById("delete-paper-id").value;
+  const verificationCode = document.getElementById("verification-code").value;
+  const messageElement = document.getElementById("verification-message");
+
+  // Validate code format (4 digits)
+  if (!/^\d{4}$/.test(verificationCode)) {
+    messageElement.textContent = "Please enter a valid 4-digit code";
+    messageElement.className = "text-red-600";
+    return;
+  }
+
+  // Try to delete the paper
+  const result = await deletePaper(paperId, verificationCode);
+
+  if (result.success) {
+    messageElement.textContent = "Paper deleted successfully";
+    messageElement.className = "text-green-600";
+
+    // Close the modal after 1 second
+    setTimeout(() => {
+      closeDeletePaperModal();
+
+      // Refresh the papers list
+      fetchPapers();
+    }, 1000);
+  } else {
+    messageElement.textContent = result.message;
+    messageElement.className = "text-red-600";
+  }
+});
