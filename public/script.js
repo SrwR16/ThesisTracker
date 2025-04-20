@@ -3,6 +3,9 @@ const members = ["Sarwar", "Mou", "Soumitro", "Eti", "Musfiq"];
 
 // Initialize app
 document.addEventListener("DOMContentLoaded", () => {
+  // Clear initial recent activity message
+  document.getElementById("recent-activity").innerHTML = "";
+
   // Load initial data
   fetchPapers();
 
