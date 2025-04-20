@@ -540,3 +540,155 @@ function openAddPaperModalForMember(member) {
   document.getElementById("modal-member").value = member;
   openAddPaperModal();
 }
+
+// Add this to your script.js file
+
+// Delete Paper Modal Functions
+function openDeletePaperModal(id, title) {
+  document.getElementById("delete-paper-id").value = id;
+  document.getElementById("delete-paper-title").textContent = title;
+  document.getElementById("delete-paper-modal").classList.add("active");
+  document.getElementById("verification-code").value = "";
+  document.getElementById("verification-message").textContent = "";
+}
+
+function closeDeletePaperModal() {
+  document.getElementById("delete-paper-modal").classList.remove("active");
+}
+
+async function deletePaper(e) {
+  e.preventDefault();
+
+  const id = document.getElementById("delete-paper-id").value;
+  const verificationCode = document.getElementById("verification-code").value;
+
+  if (!verificationCode) {
+    document.getElementById("verification-message").textContent = "Please enter the verification code";
+    document.getElementById("verification-message").classList.add("text-red-500");
+    return;
+  }
+
+  try {
+    const response = await fetch(`/papers/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ verificationCode }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      document.getElementById("verification-message").textContent = data.error || "Failed to delete paper";
+      document.getElementById("verification-message").classList.add("text-red-500");
+      return;
+    }
+
+    // Show success message
+    document.getElementById("verification-message").textContent = "Paper deleted successfully!";
+    document.getElementById("verification-message").classList.remove("text-red-500");
+    document.getElementById("verification-message").classList.add("text-green-500");
+
+    // Close modal after 1 second and refresh data
+    setTimeout(() => {
+      closeDeletePaperModal();
+      loadPapers();
+    }, 1000);
+  } catch (err) {
+    console.error("Error deleting paper:", err);
+    document.getElementById("verification-message").textContent = "Error connecting to server";
+    document.getElementById("verification-message").classList.add("text-red-500");
+  }
+}
+
+// Add this to your existing renderPaper function to include a delete button
+function renderPaper(paper, tableId) {
+  const table = document.getElementById(tableId);
+  if (!table) return;
+
+  const row = document.createElement("tr");
+  row.innerHTML = `
+    <td class="p-3">${paper.id}</td>
+    ${tableId === "all-papers-table" ? `<td class="p-3">${paper.member}</td>` : ""}
+    <td class="p-3">${paper.title}</td>
+    <td class="p-3"><a href="${paper.link}" target="_blank" class="text-blue-600 hover:underline">${truncateLink(
+    paper.link
+  )}</a></td>
+    <td class="p-3">${paper.description || ""}</td>
+    <td class="p-3">
+      <span class="status-badge ${
+        paper.status === "Original" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+      }">
+        ${paper.status}
+      </span>
+    </td>
+    <td class="p-3">${paper.dateAdded}</td>
+    <td class="p-3">
+      ${
+        paper.status === "Duplicate"
+          ? `<button class="delete-btn text-red-600 hover:text-red-800" onclick="openDeletePaperModal(${
+              paper.id
+            }, '${paper.title.replace(/'/g, "\\'")}')">
+          <i class="fas fa-trash"></i>
+        </button>`
+          : ""
+      }
+    </td>
+  `;
+
+  table.appendChild(row);
+}
+
+// Add event listener for the delete form
+document.addEventListener("DOMContentLoaded", function () {
+  // Your existing code here
+
+  // Add event listener for delete form
+  document.getElementById("delete-paper-form").addEventListener("submit", deletePaper);
+
+  // Add Bangladesh time helper
+  setInterval(updateBangladeshTime, 1000);
+});
+
+// Helper function to display current Bangladesh time
+function updateBangladeshTime() {
+  const now = new Date().toLocaleString("en-US", { timeZone: "Asia/Dhaka" });
+  const bdTime = new Date(now);
+
+  const hours = bdTime.getHours().toString().padStart(2, "0");
+  const minutes = bdTime.getMinutes().toString().padStart(2, "0");
+  const currentCode = `${hours}${minutes}`;
+
+  document.getElementById(
+    "current-bd-time"
+  ).textContent = `Current Bangladesh Time: ${hours}:${minutes} (Verification Code: ${currentCode})`;
+}
+
+// Make sure all tables have a header for the delete button
+function updateTableHeaders() {
+  const tables = ["all-papers-table", "sarwar-table", "mou-table", "soumitro-table", "eti-table", "musfiq-table"];
+
+  tables.forEach((tableId) => {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+
+    const headerRow = table.parentElement.querySelector("thead tr");
+    if (!headerRow) return;
+
+    // Check if Actions header already exists
+    if (!headerRow.querySelector("th:last-child").textContent.includes("Actions")) {
+      const actionsHeader = document.createElement("th");
+      actionsHeader.className = "p-3";
+      actionsHeader.textContent = "Actions";
+      headerRow.appendChild(actionsHeader);
+    }
+  });
+}
+
+// Update existing loadPapers function to call updateTableHeaders
+const originalLoadPapers = loadPapers;
+loadPapers = async function () {
+  await originalLoadPapers();
+  updateTableHeaders();
+};

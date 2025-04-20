@@ -105,6 +105,44 @@ app.post("/check-duplicates", async (req, res) => {
   }
 });
 
+// Add this to your existing server.js file
+
+// Delete a paper with verification
+app.delete("/papers/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { verificationCode } = req.body;
+
+    // Get Bangladesh time
+    const bangladeshTime = new Date().toLocaleString("en-US", {
+      timeZone: "Asia/Dhaka",
+    });
+
+    const bdTime = new Date(bangladeshTime);
+    const hours = bdTime.getHours().toString().padStart(2, "0");
+    const minutes = bdTime.getMinutes().toString().padStart(2, "0");
+    const currentCode = `${hours}${minutes}`;
+
+    // Validate verification code
+    if (verificationCode !== currentCode) {
+      return res.status(403).json({ error: "Invalid verification code" });
+    }
+
+    // Find and delete the paper
+    const paper = await Paper.findOneAndDelete({ id: parseInt(id) });
+
+    if (!paper) {
+      return res.status(404).json({ error: "Paper not found" });
+    }
+
+    console.log("Deleted paper:", paper); // Debug log
+    res.json({ success: true, message: "Paper deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting paper:", err);
+    res.status(500).json({ error: "Failed to delete paper", details: err.message });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
