@@ -239,6 +239,7 @@
                       <th class="p-3">Description</th>
                       <th class="p-3">Status</th>
                       <th class="p-3">Date Added</th>
+                      <th class="p-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="all-papers-table">
@@ -279,6 +280,7 @@
                       <th class="p-3">Description</th>
                       <th class="p-3">Status</th>
                       <th class="p-3">Date Added</th>
+                      <th class="p-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="sarwar-table">
@@ -318,6 +320,7 @@
                       <th class="p-3">Description</th>
                       <th class="p-3">Status</th>
                       <th class="p-3">Date Added</th>
+                      <th class="p-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="mou-table">
@@ -357,6 +360,7 @@
                       <th class="p-3">Description</th>
                       <th class="p-3">Status</th>
                       <th class="p-3">Date Added</th>
+                      <th class="p-3">Actions</th>
                     </tr>
                   </thead>
                   <tbody id="soumitro-table">
@@ -652,7 +656,14 @@
             <label for="verification-code" class="block text-sm font-medium text-gray-700 mb-1">
               Enter Verification Code (Current Bangladesh Time HHMM format)
             </label>
-            <input type="text" id="verification-code" class="form-control" placeholder="e.g. 1105" required />
+            <input
+              type="text"
+              id="verification-code"
+              class="form-control"
+              placeholder="e.g. 1105"
+              required
+              autocomplete="off"
+            />
             <p class="text-xs text-gray-500 mt-1">
               Enter the 4-digit code in 24-hour format (e.g., 7:08 AM = 0708, 2:30 PM = 1430)
             </p>
