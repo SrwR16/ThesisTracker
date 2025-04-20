@@ -6,8 +6,6 @@
     <title>Thesis Review Tracker</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Heroicons (for icons) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Custom CSS -->
@@ -29,9 +27,6 @@
           </a>
           <a href="#" onclick="showView('all-papers')" class="nav-link" data-view="all-papers">
             <i class="fas fa-file-alt w-5 mr-3"></i> All Papers
-          </a>
-          <a href="#" onclick="showView('charts')" class="nav-link" data-view="charts">
-            <i class="fas fa-chart-bar w-5 mr-3"></i> Charts
           </a>
 
           <h2 class="text-xs uppercase font-semibold text-gray-500 tracking-wide mb-2 ml-2 mt-6">Members</h2>
@@ -449,31 +444,6 @@
                     <!-- Papers will be populated here -->
                   </tbody>
                 </table>
-              </div>
-            </div>
-          </div>
-
-          <!-- Charts View -->
-          <div id="charts" class="view">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="card bg-white p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Duplicate Status</h3>
-                <canvas id="status-chart" height="250"></canvas>
-              </div>
-
-              <div class="card bg-white p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Papers by Member</h3>
-                <canvas id="member-chart" height="250"></canvas>
-              </div>
-
-              <div class="card bg-white p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Submission Timeline</h3>
-                <canvas id="timeline-chart" height="250"></canvas>
-              </div>
-
-              <div class="card bg-white p-5">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">Member Performance</h3>
-                <canvas id="performance-chart" height="250"></canvas>
               </div>
             </div>
           </div>
