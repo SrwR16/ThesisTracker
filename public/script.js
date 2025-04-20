@@ -751,6 +751,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Add Bangladesh time helper
   setInterval(updateBangladeshTime, 1000);
+
+  // Update version on load
+  updateVersion();
 });
 
 // Helper function to display current Bangladesh time
@@ -865,6 +868,18 @@ async function deletePaper(paperId, verificationCode) {
     return { success: true, message: data.message };
   } catch (error) {
     return { success: false, message: error.message };
+  }
+}
+
+// Function to update the version number
+async function updateVersion() {
+  try {
+    const response = await fetch("/version");
+    const data = await response.json();
+    document.getElementById("version").textContent = data.version;
+  } catch (error) {
+    console.error("Error fetching version:", error);
+    document.getElementById("version").textContent = "N/A";
   }
 }
 

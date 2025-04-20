@@ -143,6 +143,13 @@ app.delete("/papers/:id", async (req, res) => {
   }
 });
 
+// Get version from package.json
+const packageJson = require("./package.json");
+
+app.get("/version", (req, res) => {
+  res.json({ version: packageJson.version });
+});
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
