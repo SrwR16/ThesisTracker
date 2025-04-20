@@ -4,11 +4,7 @@
   "description": "Thesis Review Tracker",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "prepare": "npm version patch"
-  },
-  "devDependencies": {
-    "husky": "^8.0.3"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
