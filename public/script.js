@@ -486,7 +486,12 @@ function addRecentActivity(text) {
   if (!recentActivity) return;
 
   const now = new Date();
-  const timeStr = now.toLocaleTimeString();
+  const timeStr = now.toLocaleString("en-US", {
+    timeZone: "Asia/Dhaka",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
   const activityItem = document.createElement("div");
   activityItem.className = "flex items-start";
@@ -496,7 +501,7 @@ function addRecentActivity(text) {
     </div>
     <div>
       <p class="font-medium">${text}</p>
-      <p class="text-xs text-gray-400 mt-1">${timeStr}</p>
+      <p class="text-xs text-gray-400 mt-1">${timeStr} (BDT)</p>
     </div>
   `;
 
@@ -856,6 +861,7 @@ async function deletePaper(paperId, verificationCode) {
     }
 
     // Return success
+    addRecentActivity(`Paper "${paperId}" deleted successfully`);
     return { success: true, message: data.message };
   } catch (error) {
     return { success: false, message: error.message };
