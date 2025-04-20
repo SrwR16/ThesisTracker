@@ -92,9 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Initialize charts if they exist
-  if (typeof Chart !== "undefined") {
-    initializeCharts();
-  }
+  // if (typeof Chart !== "undefined") {
+  //   initializeCharts();
+  // }
 
   // Show dashboard by default
   showView("dashboard");
@@ -153,7 +153,7 @@ function showView(viewId) {
 function updateUI(papers) {
   updateDashboard(papers);
   updateTables(papers);
-  updateCharts(papers);
+  // updateCharts(papers);
 }
 
 // Update Dashboard
@@ -301,167 +301,167 @@ function createMemberTableRow(paper) {
 }
 
 // Initialize charts
-function initializeCharts() {
-  // Status chart
-  const statusCtx = document.getElementById("status-chart");
-  if (statusCtx) {
-    window.statusChart = new Chart(statusCtx.getContext("2d"), {
-      type: "pie",
-      data: {
-        labels: ["Original", "Duplicate"],
-        datasets: [
-          {
-            data: [0, 0],
-            backgroundColor: ["#c6efce", "#ffcccc"],
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: { display: true, text: "Duplicate Status Distribution" },
-        },
-      },
-    });
-  }
+// function initializeCharts() {
+//   // Status chart
+//   const statusCtx = document.getElementById("status-chart");
+//   if (statusCtx) {
+//     window.statusChart = new Chart(statusCtx.getContext("2d"), {
+//       type: "pie",
+//       data: {
+//         labels: ["Original", "Duplicate"],
+//         datasets: [
+//           {
+//             data: [0, 0],
+//             backgroundColor: ["#c6efce", "#ffcccc"],
+//           },
+//         ],
+//       },
+//       options: {
+//         responsive: true,
+//         plugins: {
+//           title: { display: true, text: "Duplicate Status Distribution" },
+//         },
+//       },
+//     });
+//   }
 
-  // Member chart
-  const memberCtx = document.getElementById("member-chart");
-  if (memberCtx) {
-    window.memberChart = new Chart(memberCtx.getContext("2d"), {
-      type: "pie",
-      data: {
-        labels: members,
-        datasets: [
-          {
-            data: members.map(() => 0),
-            backgroundColor: ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa"],
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        plugins: {
-          title: { display: true, text: "Papers by Member" },
-        },
-      },
-    });
-  }
+//   // Member chart
+//   const memberCtx = document.getElementById("member-chart");
+//   if (memberCtx) {
+//     window.memberChart = new Chart(memberCtx.getContext("2d"), {
+//       type: "pie",
+//       data: {
+//         labels: members,
+//         datasets: [
+//           {
+//             data: members.map(() => 0),
+//             backgroundColor: ["#60a5fa", "#34d399", "#f472b6", "#fbbf24", "#a78bfa"],
+//           },
+//         ],
+//       },
+//       options: {
+//         responsive: true,
+//         plugins: {
+//           title: { display: true, text: "Papers by Member" },
+//         },
+//       },
+//     });
+//   }
 
-  // Timeline chart
-  const timelineCtx = document.getElementById("timeline-chart");
-  if (timelineCtx) {
-    window.timelineChart = new Chart(timelineCtx.getContext("2d"), {
-      type: "line",
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: "Papers Over Time",
-            data: [],
-            borderColor: "#3b82f6",
-            tension: 0.1,
-            fill: false,
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0,
-            },
-          },
-        },
-      },
-    });
-  }
+//   // Timeline chart
+//   const timelineCtx = document.getElementById("timeline-chart");
+//   if (timelineCtx) {
+//     window.timelineChart = new Chart(timelineCtx.getContext("2d"), {
+//       type: "line",
+//       data: {
+//         labels: [],
+//         datasets: [
+//           {
+//             label: "Papers Over Time",
+//             data: [],
+//             borderColor: "#3b82f6",
+//             tension: 0.1,
+//             fill: false,
+//           },
+//         ],
+//       },
+//       options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         scales: {
+//           y: {
+//             beginAtZero: true,
+//             ticks: {
+//               precision: 0,
+//             },
+//           },
+//         },
+//       },
+//     });
+//   }
 
-  // Performance chart
-  const performanceCtx = document.getElementById("performance-chart");
-  if (performanceCtx) {
-    window.performanceChart = new Chart(performanceCtx.getContext("2d"), {
-      type: "radar",
-      data: {
-        labels: ["Original Papers", "Total Submissions", "Unique Links", "Consistency", "Quality"],
-        datasets: [
-          {
-            label: "Team Average",
-            data: [0, 0, 0, 0, 0],
-            borderColor: "#3b82f6",
-            backgroundColor: "rgba(59, 130, 246, 0.2)",
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          r: {
-            min: 0,
-            max: 10,
-          },
-        },
-      },
-    });
-  }
-}
+//   // Performance chart
+//   const performanceCtx = document.getElementById("performance-chart");
+//   if (performanceCtx) {
+//     window.performanceChart = new Chart(performanceCtx.getContext("2d"), {
+//       type: "radar",
+//       data: {
+//         labels: ["Original Papers", "Total Submissions", "Unique Links", "Consistency", "Quality"],
+//         datasets: [
+//           {
+//             label: "Team Average",
+//             data: [0, 0, 0, 0, 0],
+//             borderColor: "#3b82f6",
+//             backgroundColor: "rgba(59, 130, 246, 0.2)",
+//           },
+//         ],
+//       },
+//       options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         scales: {
+//           r: {
+//             min: 0,
+//             max: 10,
+//           },
+//         },
+//       },
+//     });
+//   }
+// }
 
 // Update Charts
-function updateCharts(papers) {
-  // Skip if no papers or charts not initialized
-  if (!papers || !papers.length) return;
+// function updateCharts(papers) {
+//   // Skip if no papers or charts not initialized
+//   if (!papers || !papers.length) return;
 
-  // Status chart
-  if (window.statusChart) {
-    const originalCount = papers.filter((p) => p.status === "Original").length;
-    const duplicateCount = papers.filter((p) => p.status === "Duplicate").length;
+//   // Status chart
+//   if (window.statusChart) {
+//     const originalCount = papers.filter((p) => p.status === "Original").length;
+//     const duplicateCount = papers.filter((p) => p.status === "Duplicate").length;
 
-    window.statusChart.data.datasets[0].data = [originalCount, duplicateCount];
-    window.statusChart.update();
-  }
+//     window.statusChart.data.datasets[0].data = [originalCount, duplicateCount];
+//     window.statusChart.update();
+//   }
 
-  // Member Distribution Chart
-  if (window.memberChart) {
-    const memberCounts = members.map((m) => papers.filter((p) => p.member === m).length);
-    window.memberChart.data.datasets[0].data = memberCounts;
-    window.memberChart.update();
-  }
+//   // Member Distribution Chart
+//   if (window.memberChart) {
+//     const memberCounts = members.map((m) => papers.filter((p) => p.member === m).length);
+//     window.memberChart.data.datasets[0].data = memberCounts;
+//     window.memberChart.update();
+//   }
 
-  // Timeline chart
-  if (window.timelineChart) {
-    // Get all unique dates
-    const dates = [...new Set(papers.map((p) => p.dateAdded || p.date))].sort();
+//   // Timeline chart
+//   if (window.timelineChart) {
+//     // Get all unique dates
+//     const dates = [...new Set(papers.map((p) => p.dateAdded || p.date))].sort();
 
-    // Count papers for each date (cumulative)
-    const cumulativeCounts = [];
-    let count = 0;
+//     // Count papers for each date (cumulative)
+//     const cumulativeCounts = [];
+//     let count = 0;
 
-    for (const date of dates) {
-      count += papers.filter((p) => (p.dateAdded || p.date) === date).length;
-      cumulativeCounts.push(count);
-    }
+//     for (const date of dates) {
+//       count += papers.filter((p) => (p.dateAdded || p.date) === date).length;
+//       cumulativeCounts.push(count);
+//     }
 
-    window.timelineChart.data.labels = dates;
-    window.timelineChart.data.datasets[0].data = cumulativeCounts;
-    window.timelineChart.update();
-  }
+//     window.timelineChart.data.labels = dates;
+//     window.timelineChart.data.datasets[0].data = cumulativeCounts;
+//     window.timelineChart.update();
+//   }
 
-  // Performance chart
-  if (window.performanceChart) {
-    const originalPapers = papers.filter((p) => p.status === "Original").length;
-    const totalPapers = papers.length;
-    const uniqueLinks = new Set(papers.map((p) => p.link)).size;
-    const consistency = Math.min(10, papers.length > 0 ? 5 + 5 * (originalPapers / totalPapers) : 0);
-    const quality = Math.min(10, papers.length > 0 ? 7 + Math.random() * 3 : 0);
+//   // Performance chart
+//   if (window.performanceChart) {
+//     const originalPapers = papers.filter((p) => p.status === "Original").length;
+//     const totalPapers = papers.length;
+//     const uniqueLinks = new Set(papers.map((p) => p.link)).size;
+//     const consistency = Math.min(10, papers.length > 0 ? 5 + 5 * (originalPapers / totalPapers) : 0);
+//     const quality = Math.min(10, papers.length > 0 ? 7 + Math.random() * 3 : 0);
 
-    window.performanceChart.data.datasets[0].data = [originalPapers, totalPapers, uniqueLinks, consistency, quality];
-    window.performanceChart.update();
-  }
-}
+//     window.performanceChart.data.datasets[0].data = [originalPapers, totalPapers, uniqueLinks, consistency, quality];
+//     window.performanceChart.update();
+//   }
+// }
 
 // Check Duplicates - Backend version
 async function checkDuplicates() {
