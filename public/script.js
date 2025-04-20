@@ -626,22 +626,14 @@ function openDeletePaperModal(id, title) {
 
 function closeDeletePaperModal() {
   document.getElementById("delete-paper-modal").classList.remove("active");
+  document.getElementById("verification-code").value = "";
+  document.getElementById("verification-message").textContent = "";
+  document.getElementById("verification-message").className = "";
 }
 
-async function deletePaper(e) {
-  e.preventDefault();
-
-  const id = document.getElementById("delete-paper-id").value;
-  const verificationCode = document.getElementById("verification-code").value;
-
-  if (!verificationCode) {
-    document.getElementById("verification-message").textContent = "Please enter the verification code";
-    document.getElementById("verification-message").classList.add("text-red-500");
-    return;
-  }
-
+async function deletePaper(paperId, verificationCode) {
   try {
-    const response = await fetch(`/papers/${id}`, {
+    const response = await fetch(`/papers/${paperId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -665,7 +657,7 @@ async function deletePaper(e) {
     // Close modal after 1 second and refresh data
     setTimeout(() => {
       closeDeletePaperModal();
-      loadPapers();
+      fetchPapers();
     }, 1000);
   } catch (err) {
     console.error("Error deleting paper:", err);
@@ -717,7 +709,37 @@ document.addEventListener("DOMContentLoaded", function () {
   // Your existing code here
 
   // Add event listener for delete form
-  document.getElementById("delete-paper-form").addEventListener("submit", deletePaper);
+  document.getElementById("delete-paper-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const paperId = document.getElementById("delete-paper-id").value;
+    const verificationCode = document.getElementById("verification-code").value;
+    const messageElement = document.getElementById("verification-message");
+
+    // Validate code format (4 digits)
+    if (!/^\d{4}$/.test(verificationCode)) {
+      messageElement.textContent = "Please enter a valid 4-digit code";
+      messageElement.className = "text-red-600";
+      return;
+    }
+
+    // Try to delete the paper
+    const result = await deletePaper(paperId, verificationCode);
+
+    if (result.success) {
+      messageElement.textContent = "Paper deleted successfully";
+      messageElement.className = "text-green-600";
+
+      // Close the modal after 1 second
+      setTimeout(() => {
+        closeDeletePaperModal();
+        fetchPapers();
+      }, 1000);
+    } else {
+      messageElement.textContent = result.message;
+      messageElement.className = "text-red-600";
+    }
+  });
 
   // Add Bangladesh time helper
   setInterval(updateBangladeshTime, 1000);
